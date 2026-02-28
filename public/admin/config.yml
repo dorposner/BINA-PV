@@ -3,8 +3,8 @@ backend:
   repo: dorposner/BINA-PV
   branch: main
 
-media_folder: "src/assets/images"
-public_folder: "../../assets/images" # Relative to content folders so Astro z.image() can resolve it
+media_folder: "public/images"
+public_folder: "/images"
 
 collections:
   - name: "events"
