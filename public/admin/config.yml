@@ -1,6 +1,7 @@
 backend:
-  name: git-gateway
-  branch: main # Branch to update (optional; defaults to master)
+  name: github
+  repo: dorposner/BINA-PV
+  branch: main
 
 media_folder: "src/assets/images"
 public_folder: "../../assets/images" # Relative to content folders so Astro z.image() can resolve it
