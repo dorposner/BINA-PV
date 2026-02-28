@@ -1,0 +1,34 @@
+backend:
+  name: git-gateway
+  branch: main # Branch to update (optional; defaults to master)
+
+media_folder: "src/assets/images"
+public_folder: "../../assets/images" # Relative to content folders so Astro z.image() can resolve it
+
+collections:
+  - name: "events"
+    label: "אירועים (Events)"
+    folder: "src/content/events"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "כותרת (Title)", name: "title", widget: "string"}
+      - {label: "Slug (URL Path in English)", name: "slug", widget: "string", hint: "הכנס מזהה באנגלית ללא רווחים, למשל: shabbat-dinner"}
+      - {label: "תאריך (Date)", name: "date", widget: "datetime"}
+      - {label: "שעה (Time)", name: "time", widget: "string", required: false}
+      - {label: "תיאור (Description)", name: "description", widget: "text", required: false}
+      - {label: "תמונה (Image)", name: "image", widget: "image", required: false}
+      - {label: "קישור הרשמה (Registration Link)", name: "registrationLink", widget: "string", required: false}
+
+  - name: "recommendations"
+    label: "המלצות תיירות (Recommendations)"
+    folder: "src/content/recommendations"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "כותרת (Title)", name: "title", widget: "string"}
+      - {label: "Slug (URL Path in English)", name: "slug", widget: "string", hint: "הכנס מזהה באנגלית ללא רווחים, למשל: cahuita-national-park"}
+      - {label: "גלריית תמונות (Image Gallery)", name: "imageGallery", widget: "list", field: {label: "תמונה", name: "image", widget: "image"}, required: false}
+      - {label: "קוד הטמעה מפות גוגל (Google Maps Embed)", name: "googleMapsEmbed", widget: "text", required: false}
+      - {label: "קישור חיצוני (External Link)", name: "externalLink", widget: "string", required: false}
+      - {label: "טקסט ארוך (Long Text)", name: "body", widget: "markdown", required: false}

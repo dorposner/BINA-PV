@@ -1,0 +1,144 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+export async function getStaticPaths() {
+    const recommendations = await getCollection('recommendations');
+    return recommendations.map(reco => ({
+        params: { slug: reco.slug },
+        props: { reco },
+    }));
+}
+
+const { reco } = Astro.props;
+const { title, imageGallery, googleMapsEmbed, externalLink } = reco.data;
+const { Content } = await reco.render();
+---
+
+<Layout title={title}>
+    <article class="single-reco container">
+        <header class="reco-header">
+            <h1>{title}</h1>
+            <a href="/recommendations" class="back-link">&rarr; חזרה לכל ההמלצות</a>
+        </header>
+
+        {imageGallery && imageGallery.length > 0 && (
+            <div class="gallery">
+                {imageGallery.map((img: any, index: number) => (
+                    <div class="gallery-image-wrapper">
+                         <Image src={img} alt={`${title} - תמונה ${index + 1}`} width={800} height={600} class="gallery-image" />
+                    </div>
+                ))}
+            </div>
+        )}
+
+        <div class="reco-body">
+            <Content />
+        </div>
+
+        {googleMapsEmbed && googleMapsEmbed !== '' && (
+            <div class="map-embed-wrapper">
+                <h3>מיקום על המפה</h3>
+                <div class="map-embed" set:html={googleMapsEmbed} />
+            </div>
+        )}
+
+        {externalLink && externalLink !== '' && (
+            <div class="external-link-wrapper">
+                <a href={externalLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
+                    למידע נוסף באתר הרשמי
+                </a>
+            </div>
+        )}
+    </article>
+</Layout>
+
+<style>
+    .single-reco {
+        padding-block: 3rem 5rem;
+        max-width: 900px;
+    }
+
+    .reco-header {
+        margin-block-end: 2rem;
+        border-bottom: 2px solid var(--color-sand);
+        padding-block-end: 1rem;
+    }
+
+    .reco-header h1 {
+        font-size: 2.5rem;
+        margin-block-end: 0.5rem;
+        color: var(--color-jungle-green);
+    }
+
+    .back-link {
+        color: var(--color-warm-wood);
+        font-weight: 500;
+        display: inline-block;
+        margin-block-end: 1rem;
+    }
+
+    .gallery {
+        display: grid;
+        gap: 1.5rem;
+        margin-block-end: 3rem;
+        grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 600px) {
+        .gallery {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .gallery-image-wrapper {
+        border-radius: 8px;
+        overflow: hidden;
+        height: 300px;
+    }
+
+    .gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .reco-body {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: var(--color-text);
+        margin-block-end: 3rem;
+    }
+    
+    .reco-body :global(p) {
+        margin-block-end: 1.5rem;
+    }
+
+    .reco-body :global(h2), .reco-body :global(h3) {
+        color: var(--color-jungle-green);
+        margin-block-top: 2rem;
+        margin-block-end: 1rem;
+    }
+
+    .map-embed-wrapper {
+        margin-block-end: 3rem;
+    }
+
+    .map-embed-wrapper h3 {
+        margin-block-end: 1rem;
+        color: var(--color-warm-wood);
+    }
+
+    .map-embed :global(iframe) {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+        border: 2px solid var(--color-sand);
+    }
+
+    .external-link-wrapper {
+        text-align: center;
+        margin-block-start: 2rem;
+    }
+</style>
