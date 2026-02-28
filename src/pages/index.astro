@@ -6,8 +6,8 @@ import { Image } from 'astro:assets';
 
 import treeImg from '../assets/images/tree.png';
 import slothImg from '../assets/images/sloth.png';
-import tukiImg from '../assets/images/tuki.png';
-import sloth2Img from '../assets/images/sloth2.png';
+import shabbatImg from '../assets/images/shabbat.png';
+import passoverImg from '../assets/images/passover.png';
 
 const events = await getCollection('events');
 // Sort by date ascending
@@ -36,7 +36,6 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
             </div>
             <div class="about-images">
                 <Image src={slothImg} alt="Sloth in Puerto Viejo" class="about-img main-about-img" />
-                <Image src={tukiImg} alt="Toucan Bird" class="about-img secondary-about-img" />
             </div>
         </div>
     </section>
@@ -59,18 +58,35 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
     <section id="shabbat-passover" class="shabbat-section">
         <div class="container shabbat-container">
             <div class="shabbat-image-wrapper">
-                 <Image src={sloth2Img} alt="Costa Rican Sloth" class="shabbat-img" />
+                 <Image src={shabbatImg} alt="Shabbat Dinner" class="shabbat-img round-img" />
             </div>
             <div class="shabbat-content">
-                <h2>שבת וחגים בבית BINA</h2>
+                <h2>שבת בבית BINA</h2>
                 <p>
-                    מזמינים אתכם לחגוג איתנו את השבת ואת חגי ישראל (כולל פסח מתקרב!) באווירה המיוחדת של קוסטה ריקה.
+                    מזמינים אתכם לחגוג איתנו את השבת באווירה המיוחדת של קוסטה ריקה.
                     אנא הירשמו מראש כדי שנוכל להיערך בהתאם.
                 </p>
                 <div class="shabbat-actions">
                     <a href="https://example.com/shabbat-payment" class="button button-primary" target="_blank" rel="noopener noreferrer">הזמנת ארוחת שבת</a>
-                    <a href="https://example.com/passover-payment" class="button" target="_blank" rel="noopener noreferrer">הרשמה לפסח</a>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="passover" class="passover-section">
+        <div class="container shabbat-container passover-container">
+            <div class="shabbat-content passover-content">
+                <h2>פסח מתקרב!</h2>
+                <p>
+                    הצטרפו אלינו לחגיגת ליל הסדר ולימי הפסח בפוארטו ויאחו.
+                    הבטיחו את מקומכם מראש.
+                </p>
+                <div class="shabbat-actions passover-actions">
+                    <a href="https://example.com/passover-payment" class="button button-primary" target="_blank" rel="noopener noreferrer">הרשמה לפסח</a>
+                </div>
+            </div>
+            <div class="shabbat-image-wrapper">
+                 <Image src={passoverImg} alt="Passover Celebration" class="shabbat-img round-img" />
             </div>
         </div>
     </section>
@@ -79,7 +95,7 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
 <style>
     .hero {
         position: relative;
-        background-color: var(--color-jungle-green);
+        background-color: var(--color-brand-blue);
         min-height: 80vh;
         display: flex;
         align-items: center;
@@ -105,7 +121,7 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(46, 79, 43, 0.75); /* Jungle green with opacity */
+        background-color: rgba(0, 140, 255, 0.4); /* Brand blue with opacity */
         z-index: 1;
     }
 
@@ -173,21 +189,10 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
     }
 
     .main-about-img {
-        width: 80%;
-        height: 300px;
+        width: 100%;
+        height: 350px;
         position: relative;
         z-index: 2;
-    }
-
-    .secondary-about-img {
-        position: absolute;
-        width: 60%;
-        height: 250px;
-        bottom: 0;
-        inset-inline-end: 0; /* Logical property for right side in RTL */
-        z-index: 1;
-        transform: translate(-10%, 10%);
-        border: 4px solid var(--color-white);
     }
 
     .schedule-section {
@@ -218,10 +223,16 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
 
     .shabbat-section {
         padding-block: 5rem;
-        background-color: var(--color-warm-wood);
+        background-color: var(--color-brand-green);
         color: var(--color-white);
     }
     
+    .passover-section {
+        padding-block: 5rem;
+        background-color: var(--color-brand-blue);
+        color: var(--color-white);
+    }
+
     .shabbat-container {
         display: grid;
         grid-template-columns: 1fr;
@@ -233,18 +244,21 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
         .shabbat-container {
             grid-template-columns: auto 1fr;
         }
+        .passover-container {
+            grid-template-columns: 1fr auto;
+        }
     }
 
     .shabbat-image-wrapper {
         text-align: center;
     }
 
-    .shabbat-img {
+    .round-img {
         width: 100%;
-        max-width: 400px;
+        max-width: 350px;
         height: auto;
         border-radius: 50%;
-        border: 6px solid rgba(255,255,255,0.2);
+        border: 4px solid var(--color-white);
         box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         object-fit: cover;
         aspect-ratio: 1;
@@ -263,14 +277,23 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
         }
     }
 
-    .shabbat-section h2 {
-        color: var(--color-white);
+    .shabbat-section h2, .passover-section h2 {
+        color: var(--color-text-bright);
         font-size: 2.2rem;
         margin-block-end: 1rem;
     }
 
     .shabbat-content p {
         font-size: 1.15rem;
+        color: var(--color-white);
+        max-width: 600px;
+        margin-block-end: 2rem;
+        line-height: 1.6;
+    }
+    
+    .passover-content p {
+        font-size: 1.15rem;
+        color: var(--color-text-bright);
         max-width: 600px;
         margin-block-end: 2rem;
         line-height: 1.6;
@@ -280,6 +303,15 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
+    }
+    
+    .passover-actions .button {
+        background-color: var(--color-brand-red);
+        color: var(--color-white);
+    }
+    
+    .passover-actions .button:hover {
+        opacity: 0.9;
     }
     
     /* Ensure the non-primary button in Shabbat section stands out better on wood bg */

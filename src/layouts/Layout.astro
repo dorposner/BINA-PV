@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import { Image } from 'astro:assets';
+import logoImg from '../assets/images/Logo2022-2.png';
 
 interface Props {
 	title: string;
@@ -24,7 +26,9 @@ const { title } = Astro.props;
 	<body>
         <header class="site-header">
             <div class="container header-container">
-                <a href="/" class="logo">BINA P.V.</a>
+                <a href="/" class="logo" aria-label="BINA P.V. Home">
+                    <Image src={logoImg} alt="BINA P.V. Logo" height={50} class="header-logo" />
+                </a>
                 <button class="hamburger" aria-label="תפריט" aria-expanded="false" aria-controls="main-nav">
                     <span></span>
                     <span></span>
@@ -74,7 +78,7 @@ const { title } = Astro.props;
 
 <style>
     .site-header {
-        background-color: var(--color-white);
+        background-color: var(--color-brand-blue);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         position: sticky;
         top: 0;
@@ -85,13 +89,13 @@ const { title } = Astro.props;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-block: 1rem;
+        padding-block: 0.5rem;
     }
 
-    .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--color-jungle-green);
+    .header-logo {
+        height: 50px;
+        width: auto;
+        display: block;
     }
 
     .main-nav {
@@ -116,13 +120,13 @@ const { title } = Astro.props;
     .main-nav a {
         display: block;
         padding: 1rem;
-        border-block-end: 1px solid var(--color-sand);
-        color: var(--color-text);
+        border-block-end: 1px solid rgba(255,255,255,0.1);
+        color: var(--color-white); /* White text in mobile menu */
         font-weight: 500;
     }
 
     .main-nav a:hover {
-        background-color: var(--color-sand-light);
+        background-color: rgba(255,255,255,0.1);
         text-decoration: none;
     }
 
@@ -142,7 +146,7 @@ const { title } = Astro.props;
     .hamburger span {
         width: 100%;
         height: 3px;
-        background-color: var(--color-jungle-green);
+        background-color: var(--color-white); /* White hamburger lines on blue bg */
         border-radius: 10px;
         transition: all 0.3s linear;
         transform-origin: 1px;
@@ -177,16 +181,17 @@ const { title } = Astro.props;
         .main-nav a {
             padding: 0;
             border: none;
+            color: var(--color-white); /* White text in desktop header */
         }
 
         .main-nav a:hover {
             background-color: transparent;
-            color: var(--color-jungle-green);
+            color: var(--color-text-bright); /* Bright color on hover */
         }
     }
 
     .site-footer {
-        background-color: var(--color-jungle-green);
+        background-color: var(--color-brand-blue);
         color: var(--color-white);
         padding-block: 2rem;
         text-align: center;

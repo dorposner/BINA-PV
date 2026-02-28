@@ -1,13 +1,15 @@
 /* CSS Reset and Global Variables */
 
 :root {
-  --color-jungle-green: #2E4F2B;
-  --color-warm-wood: #8B5A2B;
-  --color-sand: #E6D5B8;
-  --color-sand-light: #f5eedf;
-  --color-text: #333333;
-  --color-background: var(--color-sand-light);
+  --color-brand-blue: #008cff;
+  --color-brand-green: #68ba5a;
+  --color-brand-red: #ff3131;
+  --color-text-bright: #fffda6;
   --color-white: #ffffff;
+  --color-background: #f8f9fa;
+  /* Keeping a light neutral background for readability */
+  --color-text: #333333;
+  /* Dark text for readable body content */
 }
 
 html {
@@ -23,7 +25,9 @@ body {
   box-sizing: border-box;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
 }
 
@@ -35,7 +39,7 @@ body {
 }
 
 a {
-  color: var(--color-jungle-green);
+  color: var(--color-brand-blue);
   text-decoration: none;
 }
 
@@ -49,9 +53,10 @@ ul {
   margin: 0;
 }
 
-button, .button {
+button,
+.button {
   display: inline-block;
-  background-color: var(--color-warm-wood);
+  background-color: var(--color-brand-red);
   color: var(--color-white);
   padding: 0.75rem 1.5rem;
   border: none;
@@ -59,24 +64,30 @@ button, .button {
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
-button:hover, .button:hover {
-  background-color: #6d4621;
+button:hover,
+.button:hover {
+  opacity: 0.9;
   text-decoration: none;
   color: var(--color-white);
 }
 
 .button-primary {
-  background-color: var(--color-jungle-green);
+  background-color: var(--color-brand-green);
+  color: var(--color-white);
 }
+
 .button-primary:hover {
-  background-color: #1f361d;
+  opacity: 0.9;
 }
 
 /* Typography styles */
-h1, h2, h3, h4 {
-  color: var(--color-jungle-green);
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-brand-blue);
   margin-block-start: 0;
 }
