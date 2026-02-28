@@ -23,7 +23,7 @@ const recommendations = await getCollection('recommendations');
                     )}
                     <div class="reco-content">
                         <h2>{reco.data.title}</h2>
-                        <a href={`/recommendations/${reco.data.slug}`} class="button button-primary details-link">קרא עוד</a>
+                        <a href={`/recommendations/${reco.slug}`} class="button button-primary details-link">קרא עוד</a>
                     </div>
                 </article>
             ))
