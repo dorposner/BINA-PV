@@ -14,7 +14,10 @@ const { title } = Astro.props;
 <html lang="he" dir="rtl">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Your Israeli-Jewish home in Costa Rica" />
+		<meta name="description" content="בית קהילת בינ״ה בפוארטו וייחו, קוסטה ריקה. הבית הישראלי-יהודי שלכם למפגש, קבלות שבת, ארוחות קהילתיות והמלצות למטיילים." />
+		<meta property="og:title" content={`${title} | בית בינה פורטו וייחו`} />
+		<meta property="og:description" content="בית קהילת בינ״ה בפוארטו וייחו, קוסטה ריקה. הבית הישראלי-יהודי שלכם למפגש, קבלות שבת, ארוחות קהילתיות והמלצות למטיילים." />
+		<meta property="og:type" content="website" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
