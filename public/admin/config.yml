@@ -1,7 +1,8 @@
 backend:
   name: github
-  repo: dorposner/BINA-PV
+  repo: dorposner/bina-pv
   branch: main
+  base_url: https://sveltia.com
 
 media_folder: "public/images"
 public_folder: "/images"
