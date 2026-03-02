@@ -4,6 +4,7 @@ const eventsCollection = defineCollection({
     type: 'content',
     schema: z.object({
         title: z.string(),
+        permalink: z.string().optional(),
         date: z.date(),
         time: z.string().optional(),
         description: z.string().optional(),
@@ -16,6 +17,7 @@ const recommendationsCollection = defineCollection({
     type: 'content',
     schema: z.object({
         title: z.string(),
+        permalink: z.string().optional(),
         imageGallery: z.array(z.string()).optional(),
         googleMapsEmbed: z.string().optional(),
         externalLink: z.string().url().optional().or(z.literal('')),

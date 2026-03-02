@@ -1,25 +1,37 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import EventCard from '../components/EventCard.astro';
+import Layout from '../../layouts/Layout.astro';
+import EventCard from '../../components/EventCard.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
-import treeImg from '../assets/images/tree.png';
-import slothImg from '../assets/images/sloth.png';
-import shabbatImg from '../assets/images/shabbat.png';
-import passoverImg from '../assets/images/passover.png';
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    { params: { lang: 'en' } },
+  ];
+}
 
-const events = await getCollection('events');
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+import treeImg from '../../assets/images/tree.png';
+import slothImg from '../../assets/images/sloth.png';
+import shabbatImg from '../../assets/images/shabbat.png';
+import passoverImg from '../../assets/images/passover.png';
+
+const allEvents = await getCollection('events');
+const events = allEvents.filter(entry => entry.id.startsWith(`${lang}/`));
 // Sort by date ascending
 const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
 ---
 
-<Layout title="ראשי">
+<Layout title={t('nav.home')}>
     <section class="hero">
         <div class="container hero-content">
-            <h1>הבית הישראלי שלכם בקוסטה ריקה</h1>
-            <p>מוזמנים להצטרף אלינו לפעילויות, ארוחות שבת, סדנאות ועוד בלב פוארטו וייחו.</p>
-            <a href="#schedule" class="button button-primary cta-button">ללוח האירועים שלנו</a>
+            <h1>{t('hero.title')}</h1>
+            <p>{t('hero.subtitle')}</p>
+            <a href="#schedule" class="button button-primary cta-button">{t('hero.cta')}</a>
         </div>
         <div class="hero-overlay"></div>
     </section>
@@ -27,14 +39,14 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
     <section id="about" class="about-section">
         <div class="container about-container">
             <div class="container">
-               <h2>אודותינו</h2>
-                <p><strong>נעים להכיר! אנחנו משפחת פוזנר – קרן, דור, והבנות גילי ורותם.</strong><br>
-            כבר למעלה משנתיים שאנחנו נמצאים במסע חובק עולם. טיילנו בהודו, תאילנד, סינגפור, לאוס, וייטנאם, הפיליפינים, הונג קונג, טייוואן, יפן, ארצות הברית, הבהאמס ומקסיקו, ועכשיו – הגענו לקוסטה ריקה במטרה להקים בית חם למטיילים ישראלים בפוארטו וייחו.</p>
+               <h2>{t('about.title')}</h2>
+                <p><strong>{t('about.p1.strong')}</strong><br>
+            {t('about.p1')}</p>
 
-                <p>חברנו לארגון בינ"ה כדי ליצור יחד מרחב שמאפשר לישראלים להרגיש בבית, רחוק מהבית. אנחנו מזמינים אתכם להצטרף אלינו לפעילויות, לקחת חלק בעשייה, או פשוט לבוא לשבת ולהרגיש ביחד. נהיה כאן לתקופה קצרה וקסומה של שלושה חודשים בלבד (מרץ, אפריל ומאי 2026) – אז אם אתם מטיילים במרכז אמריקה בתקופה הקרובה, תכננו קפיצה לפוארטו וייחו ובואו להתארח אצלנו!</p>
+                <p>{t('about.p2')}</p>
 
-                <h3 style="margin-top: 2rem;">קצת על ארגון בינ"ה</h3>
-                <p>בינ"ה (התנועה ליהדות חברתית) פועלת לקידום זהות יהודית-ישראלית המבוססת על קהילה, תרבות ועשייה. הבתים של בינ"ה ברחבי העולם משמשים כמוקדי מפגש ייחודיים למטיילים, ומציעים מרחב פתוח, פלורליסטי ומקבל לציון שבתות וחגים, למידה משותפת וחיבור אותנטי לישראליות – באווירה שמזמינה פנימה כל אחת ואחד.</p>
+                <h3 style="margin-top: 2rem;">{t('about.bina.title')}</h3>
+                <p>{t('about.bina.desc')}</p>
             </div>
             <div class="about-images">
                 <Image src={slothImg} alt="Sloth in Puerto Viejo" class="about-img main-about-img" />
@@ -44,14 +56,14 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
 
     <section id="schedule" class="schedule-section">
         <div class="container">
-            <h2>לוח אירועים שבועי</h2>
+            <h2>{t('schedule.title')}</h2>
             <div class="events-grid">
                 {sortedEvents.length > 0 ? (
                     sortedEvents.map(event => (
                         <EventCard event={event} />
                     ))
                 ) : (
-                    <p>לא נמצאו אירועים קרובים כרגע.</p>
+                    <p>{t('schedule.empty')}</p>
                 )}
             </div>
         </div>
@@ -63,13 +75,10 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
                  <Image src={shabbatImg} alt="Shabbat Dinner" class="shabbat-img round-img" />
             </div>
             <div class="shabbat-content">
-                <h2>שבת בפורטו וייחו</h2>
-                <p>
-                    מזמינים אתכם לחגוג איתנו את השבת באווירה המיוחדת של קוסטה ריקה.
-                    אנא הירשמו מראש כדי שנוכל להיערך בהתאם.
-                </p>
+                <h2>{t('shabbat.title')}</h2>
+                <p>{t('shabbat.desc')}</p>
                 <div class="shabbat-actions">
-                    <a href="https://forms.gle/zRwQTjPmdCikY2Dd7" class="button button-primary" target="_blank" rel="noopener noreferrer">הזמנת ארוחת שבת</a>
+                    <a href="https://forms.gle/zRwQTjPmdCikY2Dd7" class="button button-primary" target="_blank" rel="noopener noreferrer">{t('shabbat.cta')}</a>
                 </div>
             </div>
         </div>
@@ -78,13 +87,10 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
     <section id="passover" class="passover-section">
         <div class="container shabbat-container passover-container">
             <div class="shabbat-content passover-content">
-                <h2>פסח מתקרב!</h2>
-                <p>
-                    הצטרפו אלינו לחגיגת ליל הסדר ולימי הפסח בפוארטו ויאחו.
-                    הבטיחו את מקומכם מראש.
-                </p>
+                <h2>{t('passover.title')}</h2>
+                <p>{t('passover.desc')}</p>
                 <div class="shabbat-actions passover-actions">
-                    <a href="https://bit.ly/4aGlgUY" class="button button-primary" target="_blank" rel="noopener noreferrer">הרשמה לפסח</a>
+                    <a href="https://bit.ly/4aGlgUY" class="button button-primary" target="_blank" rel="noopener noreferrer">{t('passover.cta')}</a>
                 </div>
             </div>
             <div class="shabbat-image-wrapper">

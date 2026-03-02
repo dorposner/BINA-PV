@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 interface Props {
   event: any;
@@ -8,8 +9,12 @@ interface Props {
 const { event } = Astro.props;
 const { title, date, time, description, image, registrationLink } = event.data;
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
 // Formatting the date
-const formatter = new Intl.DateTimeFormat('he-IL', {
+const locale = lang === 'he' ? 'he-IL' : 'en-US';
+const formatter = new Intl.DateTimeFormat(locale, {
   weekday: 'long', 
   year: 'numeric', 
   month: 'long', 
@@ -36,12 +41,12 @@ const formattedDate = date ? formatter.format(date) : '';
         <div class="event-actions">
             {registrationLink && registrationLink !== '' && (
                 <a href={registrationLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
-                    הרשמה
+                    {t('event.register')}
                 </a>
             )}
             
-            <button class="button share-button" aria-label="שתף אירוע" data-title={title} data-text={description || ''} data-url={Astro.url.href}>
-                שתף
+            <button class="button share-button" aria-label={t('event.share')} data-title={title} data-text={description || ''} data-url={Astro.url.href} data-msg-copied={t('event.copied')}>
+                {t('event.share')}
             </button>
         </div>
     </div>
@@ -57,6 +62,7 @@ const formattedDate = date ? formatter.format(date) : '';
                 const title = button.getAttribute('data-title') || '';
                 const text = button.getAttribute('data-text') || '';
                 const url = button.getAttribute('data-url') || window.location.href;
+                const msgCopied = button.getAttribute('data-msg-copied') || 'Copied!';
                 
                 if (navigator.share) {
                     try {
@@ -71,7 +77,7 @@ const formattedDate = date ? formatter.format(date) : '';
                 } else {
                     try {
                         await navigator.clipboard.writeText(`${title} - ${url}`);
-                        alert('הקישור הועתק ללוח!');
+                        alert(msgCopied);
                     } catch (err) {
                         console.error('Failed to copy: ', err);
                     }

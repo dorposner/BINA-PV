@@ -2,16 +2,21 @@
 import '../styles/global.css';
 import { Image } from 'astro:assets';
 import logoImg from '../assets/images/Logo2022-2.png';
+import { getLangFromUrl, useTranslations, useDir } from '../i18n/utils';
 
 interface Props {
 	title: string;
 }
 
 const { title } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const dir = useDir(lang);
+const basePath = lang === 'he' ? '' : '/' + lang;
 ---
 
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang={lang} dir={dir}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="google-site-verification" content="RYgMh40MVQ6JqgAP3Ks7-JQBrbUp2idX2raAjajqrv0" />
@@ -44,10 +49,11 @@ const { title } = Astro.props;
                 </button>
                 <nav id="main-nav" class="main-nav">
                     <ul>
-                        <li><a href="/">ראשי</a></li>
-                        <li><a href="/#about">אודות</a></li>
-                        <li><a href="/#schedule">לוח אירועים</a></li>
-                        <li><a href="/recommendations">המלצות טיולים</a></li>
+                        <li><a href={`${basePath}/`}>{t('nav.home')}</a></li>
+                        <li><a href={`${basePath}/#about`}>{t('nav.about')}</a></li>
+                        <li><a href={`${basePath}/#schedule`}>{t('nav.schedule')}</a></li>
+                        <li><a href={`${basePath}/recommendations`}>{t('nav.recommendations')}</a></li>
+                        <li class="lang-switcher-item"><a href={t('langSwitcher.url')} class="lang-switcher-link">{t('langSwitcher.title')}</a></li>
                     </ul>
                 </nav>
             </div>
@@ -64,7 +70,7 @@ const { title } = Astro.props;
                     <a href="https://instagram.com/PosnerTravel" target="_blank" rel="noopener noreferrer">אינסטגרם PosnerTravel</a>
                     <a href="https://chat.whatsapp.com/DVKzxGkoH9AAf3mL7IGd3p" class="whatsapp-link" target="_blank" rel="noopener noreferrer">קבוצת וואטסאפ</a>
                 </div>
-                <p>&copy; {new Date().getFullYear()} בית בינ"ה פורטו וייחו. כל הזכויות שמורות.</p>
+                <p>&copy; {new Date().getFullYear()} {t('footer.rights')}</p>
             </div>
         </footer>
 
@@ -186,15 +192,18 @@ const { title } = Astro.props;
             gap: 1.5rem;
         }
 
-        .main-nav a {
-            padding: 0;
-            border: none;
-            color: var(--color-white); /* White text in desktop header */
-        }
-
         .main-nav a:hover {
             background-color: transparent;
             color: var(--color-text-bright); /* Bright color on hover */
+        }
+
+        .lang-switcher-link {
+            font-weight: 700 !important;
+            color: var(--color-brand-red) !important;
+        }
+
+        .lang-switcher-link:hover {
+            color: var(--color-white) !important;
         }
     }
 
