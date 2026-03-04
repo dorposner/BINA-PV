@@ -19,7 +19,7 @@ const allRecommendations = await getCollection('recommendations');
 const recommendations = allRecommendations.filter(entry => entry.id.startsWith(`${lang}/`));
 ---
 
-<Layout title={t('recs.title')}>
+<Layout title={t('recs.title')} description={t('recs.subtitle')}>
     <section class="recommendations-header container">
         <h1>{t('recs.title')}</h1>
         <p>{t('recs.subtitle')}</p>

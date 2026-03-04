@@ -20,15 +20,17 @@ export async function getStaticPaths() {
 }
 
 const { reco } = Astro.props;
-const { title, imageGallery, googleMapsEmbed, externalLink } = reco.data;
+const { title, description, imageGallery, googleMapsEmbed, externalLink } = reco.data;
 const { Content } = await reco.render();
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const basePath = lang === 'he' ? '' : '/' + lang;
+
+const ogImage = imageGallery && imageGallery.length > 0 ? imageGallery[0] : undefined;
 ---
 
-<Layout title={title}>
+<Layout title={title} description={description} image={ogImage}>
     <article class="single-reco container">
         <header class="reco-header">
             <h1>{title}</h1>

@@ -36,6 +36,7 @@ collections:
     fields:
       - {label: "כותרת (Title)", name: "title", widget: "string", i18n: true}
       - {label: "Permalink (URL Path in English)", name: "permalink", widget: "string", hint: "הכנס מזהה באנגלית ללא רווחים, למשל: cahuita-national-park", i18n: duplicate}
+      - {label: "תיאור (Description)", name: "description", widget: "string", required: false, i18n: true}
       - {label: "גלריית תמונות (Image Gallery)", name: "imageGallery", widget: "list", field: {label: "תמונה", name: "image", widget: "image"}, required: false, i18n: duplicate}
       - {label: "קוד הטמעה מפות גוגל (Google Maps Embed)", name: "googleMapsEmbed", widget: "text", required: false, i18n: duplicate}
       - {label: "קישור חיצוני (External Link)", name: "externalLink", widget: "string", required: false, i18n: duplicate}

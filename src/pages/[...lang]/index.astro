@@ -26,7 +26,7 @@ const events = allEvents.filter(entry => entry.id.startsWith(`${lang}/`));
 const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
 ---
 
-<Layout title={t('nav.home')}>
+<Layout title={t('nav.home')} description={t('about.p1')}>
     <section class="hero">
         <div class="container hero-content">
             <h1>{t('hero.title')}</h1>
