@@ -21,7 +21,8 @@ import shabbatImg from '../../assets/images/shabbat.png';
 import passoverImg from '../../assets/images/passover.png';
 
 const allEvents = await getCollection('events');
-const events = allEvents.filter(entry => entry.id.startsWith(`${lang}/`));
+const cutoffDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+const events = allEvents.filter(entry => entry.id.startsWith(`${lang}/`) && entry.data.date >= cutoffDate);
 // Sort by date ascending
 const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
 ---

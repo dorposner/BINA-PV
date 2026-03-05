@@ -1,0 +1,85 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import EventCard from '../../../components/EventCard.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const allEvents = await getCollection('events');
+const cutoffDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+const pastEvents = allEvents.filter(entry => entry.id.startsWith(`${lang}/`) && entry.data.date < cutoffDate);
+// Sort by date descending (most recent first)
+const sortedEvents = pastEvents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Layout title={t('archive.title')} description={t('archive.subtitle')}>
+    <section class="archive-section">
+        <div class="container">
+            <div class="archive-header">
+               <h1>{t('archive.title')}</h1>
+               <p>{t('archive.subtitle')}</p>
+            </div>
+            
+            <div class="events-grid">
+                {sortedEvents.length > 0 ? (
+                    sortedEvents.map(event => (
+                        <EventCard event={event} />
+                    ))
+                ) : (
+                    <p>{t('archive.empty')}</p>
+                )}
+            </div>
+        </div>
+    </section>
+</Layout>
+
+<style>
+    .archive-section {
+        padding-block: 4rem;
+        background-color: var(--color-sand-light);
+        min-height: 80vh;
+    }
+
+    .archive-header {
+        text-align: center;
+        margin-block-end: 3rem;
+    }
+
+    .archive-header h1 {
+        font-size: 2.5rem;
+        margin-block-end: 1rem;
+        color: var(--color-brand-blue);
+    }
+
+    .archive-header p {
+        font-size: 1.2rem;
+        color: var(--color-text);
+    }
+
+    .events-grid {
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 768px) {
+        .events-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .events-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
