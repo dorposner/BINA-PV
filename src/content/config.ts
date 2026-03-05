@@ -18,10 +18,11 @@ const recommendationsCollection = defineCollection({
     schema: z.object({
         title: z.string(),
         permalink: z.string().optional(),
+        slug: z.string().optional(),
         description: z.string().optional(),
         imageGallery: z.array(z.string()).optional(),
         googleMapsEmbed: z.string().optional(),
-        externalLink: z.string().url().optional().or(z.literal('')),
+        externalLink: z.string().optional().or(z.literal('')),
     }),
 });
 
