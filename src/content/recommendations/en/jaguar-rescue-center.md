@@ -1,6 +1,5 @@
 ---
 title: "Jaguar Rescue Center"
-slug: "jaguar-rescue-center"
 permalink: "jaguar-rescue-center"
 description: "A moving and educational institution that rehabilitates injured or orphaned wildlife. The tours are fascinating and suitable for everyone - from families with children to backpackers. This is your chance to see sloths, parrots, monkeys, and snakes up close, who are treated with dedication before safely returning to nature."
 imageGallery: []

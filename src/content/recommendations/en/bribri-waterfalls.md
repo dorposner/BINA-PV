@@ -1,6 +1,5 @@
 ---
 title: "BriBri Waterfalls"
-slug: "bribri-waterfalls"
 permalink: "bribri-waterfalls"
 description: "An authentic experience combining tropical nature and the culture of the local Bribri community. It's a short and easy walk through the forest leading to hidden, refreshing waterfalls. Taking a swim in the cool water is highly recommended, and with a bit of luck, you'll spot Costa Rica's colorful little poison dart frogs hopping around."
 imageGallery: []
