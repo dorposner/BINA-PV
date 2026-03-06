@@ -1,5 +1,5 @@
 ---
-title: ארוחת שבת קהילתית
+title: ארוחת שבת קהילתית 6/3/26
 permalink: shabbat-dinner-demo
 date: 2026-03-06T18:00:00
 time: 18:00
