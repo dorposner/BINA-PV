@@ -27,11 +27,13 @@ const recommendations = allRecommendations.filter(entry => entry.id.startsWith(`
 
     <section class="container recommendations-grid">
         {recommendations.length > 0 ? (
-            recommendations.map(reco => (
+            recommendations.map(reco => {
+                const images = (reco.data.imageGallery || []).filter(img => img && img.trim() !== '');
+                return (
                 <article class="reco-card">
-                    {reco.data.imageGallery && reco.data.imageGallery.length > 0 && (
+                    {images.length > 0 && (
                         <div class="reco-image-wrapper">
-                            <Image src={reco.data.imageGallery[0]} alt={reco.data.title} width={600} height={400} class="reco-image" />
+                            <Image src={images[0]} alt={reco.data.title} width={600} height={400} class="reco-image" />
                         </div>
                     )}
                     <div class="reco-content">
@@ -39,7 +41,8 @@ const recommendations = allRecommendations.filter(entry => entry.id.startsWith(`
                         <a href={`${basePath}/recommendations/${reco.data.permalink || reco.id.split('/').pop().replace('.md', '')}`} class="button button-primary details-link">{t('recs.readmore')}</a>
                     </div>
                 </article>
-            ))
+                );
+            })
         ) : (
             <p class="no-reco">{t('recs.empty')}</p>
         )}

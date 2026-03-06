@@ -27,7 +27,8 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const basePath = lang === 'he' ? '' : '/' + lang;
 
-const ogImage = imageGallery && imageGallery.length > 0 ? imageGallery[0] : undefined;
+const filteredGallery = (imageGallery || []).filter(img => img && img.trim() !== '');
+const ogImage = filteredGallery.length > 0 ? filteredGallery[0] : undefined;
 ---
 
 <Layout title={title} description={description} image={ogImage}>
@@ -37,9 +38,9 @@ const ogImage = imageGallery && imageGallery.length > 0 ? imageGallery[0] : unde
             <a href={`${basePath}/recommendations`} class="back-link">{t('recs.back')}</a>
         </header>
 
-        {imageGallery && imageGallery.length > 0 && (
+        {filteredGallery.length > 0 && (
             <div class="gallery">
-                {imageGallery.map((img: any, index: number) => (
+                {filteredGallery.map((img: any, index: number) => (
                     <div class="gallery-image-wrapper">
                          <Image src={img} alt={`${title} - image ${index + 1}`} width={800} height={600} class="gallery-image" />
                     </div>
