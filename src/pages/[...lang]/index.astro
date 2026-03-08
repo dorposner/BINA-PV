@@ -18,7 +18,7 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 import treeImg from '../../assets/images/tree.png';
-import slothImg from '../../assets/images/sloth.png';
+import posnerImg from '../../assets/images/posnerfamily.png';
 import shabbatImg from '../../assets/images/shabbat.png';
 import passoverImg from '../../assets/images/passover.png';
 
@@ -52,7 +52,7 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
                 <p>{t('about.bina.desc')}</p>
             </div>
             <div class="about-images">
-                <Image src={slothImg} alt="Sloth in Puerto Viejo" class="about-img main-about-img" />
+                <Image src={posnerImg} alt="Posner family" class="about-img main-about-img" />
             </div>
         </div>
     </section>
