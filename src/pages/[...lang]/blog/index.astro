@@ -1,0 +1,143 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const basePath = lang === 'he' ? '' : '/' + lang;
+
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .filter(entry => entry.id.startsWith(`${lang}/`))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Layout title={t('blog.title')} description={t('nav.blog')}>
+    <section class="blog-header container">
+        <h1>{t('blog.title')}</h1>
+    </section>
+
+    <section class="container blog-grid">
+        {posts.length > 0 ? (
+            posts.map(post => {
+                const img = post.data.image && post.data.image.trim() !== '' ? post.data.image : null;
+                const formattedDate = new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }).format(post.data.date);
+                
+                return (
+                <article class="blog-card">
+                    {img && (
+                        <div class="blog-image-wrapper">
+                            <Image src={img} alt={post.data.title} width={600} height={400} class="blog-image" />
+                        </div>
+                    )}
+                    <div class="blog-content">
+                        <h2>{post.data.title}</h2>
+                        <span class="blog-date">{formattedDate}</span>
+                        {post.data.description && <p class="blog-desc">{post.data.description}</p>}
+                        <a href={`${basePath}/blog/${post.data.permalink || post.id.split('/').pop().replace('.md', '')}`} class="button button-primary details-link">{lang === 'he' ? 'קרא עוד' : 'Read More'}</a>
+                    </div>
+                </article>
+                );
+            })
+        ) : (
+            <p class="no-posts">{t('blog.empty')}</p>
+        )}
+    </section>
+</Layout>
+
+<style>
+    .blog-header {
+        padding-block: 4rem 2rem;
+        text-align: center;
+    }
+
+    .blog-grid {
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: 1fr;
+        padding-block-end: 4rem;
+    }
+
+    @media (min-width: 768px) {
+        .blog-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .blog-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .blog-card {
+        background-color: var(--color-white);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid var(--color-sand);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .blog-image-wrapper {
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+    }
+
+    .blog-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .blog-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .blog-content h2 {
+        margin-block-end: 0.5rem;
+        font-size: 1.25rem;
+        color: var(--color-jungle-green);
+    }
+    
+    .blog-date {
+        color: var(--color-warm-wood);
+        font-size: 0.9rem;
+        margin-block-end: 1rem;
+    }
+    
+    .blog-desc {
+        margin-block-end: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .details-link {
+        margin-block-start: auto;
+    }
+
+    .no-posts {
+        text-align: center;
+        grid-column: 1 / -1;
+        font-size: 1.1rem;
+        color: var(--color-warm-wood);
+    }
+</style>

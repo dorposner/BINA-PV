@@ -26,7 +26,19 @@ const recommendationsCollection = defineCollection({
     }),
 });
 
+const blogCollection = defineCollection({
+    type: 'content',
+    schema: z.object({
+        title: z.string(),
+        permalink: z.string().optional(),
+        date: z.date(),
+        description: z.string().optional(),
+        image: z.string().optional(),
+    }),
+});
+
 export const collections = {
     'events': eventsCollection,
     'recommendations': recommendationsCollection,
+    'blog': blogCollection,
 };

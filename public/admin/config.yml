@@ -42,3 +42,16 @@ collections:
       - {label: "קישור חיצוני (External Link)", name: "externalLink", widget: "string", required: false, i18n: duplicate}
       - {label: "טקסט ארוך (Long Text)", name: "body", widget: "markdown", required: false, i18n: true}
 
+  - name: "blog"
+    label: "בלוג (Blog)"
+    folder: "src/content/blog"
+    create: true
+    i18n: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "כותרת (Title)", name: "title", widget: "string", i18n: true}
+      - {label: "Permalink", name: "permalink", widget: "string", i18n: duplicate}
+      - {label: "תאריך (Date)", name: "date", widget: "datetime", i18n: duplicate}
+      - {label: "תיאור קצר (Description)", name: "description", widget: "text", required: false, i18n: true}
+      - {label: "תמונה ראשית (Main Image)", name: "image", widget: "image", required: false, i18n: duplicate}
+      - {label: "תוכן הפוסט (Body)", name: "body", widget: "markdown", i18n: true}

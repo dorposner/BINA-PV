@@ -46,6 +46,9 @@ export const ui = {
         'recs.empty': 'בקרוב יעלו המלצות חדשות!',
         'recs.readmore': 'קרא עוד',
         'recs.map': 'מיקום על המפה',
+        'nav.blog': 'בלוג',
+        'blog.title': 'הבלוג שלנו',
+        'blog.empty': 'אין פוסטים עדיין.',
     },
     en: {
         'nav.home': 'Home',
@@ -87,5 +90,8 @@ export const ui = {
         'recs.empty': 'New recommendations coming soon!',
         'recs.readmore': 'Read More',
         'recs.map': 'Location on map',
+        'nav.blog': 'Blog',
+        'blog.title': 'Our Blog',
+        'blog.empty': 'No posts yet.',
     },
 } as const;
