@@ -55,6 +55,7 @@ export const ui = {
         'wheel.title': 'לא יודעים מה לעשות היום?',
         'wheel.button': 'סובבו את הגלגל!',
         'wheel.link': 'קחו אותי לשם!',
+        'footer.bina_site': 'אתר בינ"ה',
     },
     en: {
         'nav.home': 'Home',
@@ -105,5 +106,6 @@ export const ui = {
         'wheel.title': "Don't know what to do today?",
         'wheel.button': 'Spin the Wheel!',
         'wheel.link': 'Take me there!',
+        'footer.bina_site': 'BINA Website',
     },
 } as const;
