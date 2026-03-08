@@ -1,0 +1,249 @@
+---
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const basePath = lang === 'he' ? '' : '/' + lang;
+
+const allRecommendations = await getCollection('recommendations');
+const recommendations = allRecommendations.filter((entry: any) => entry.id.startsWith(`${lang}/`));
+
+const wheelItems = recommendations.map((reco: any) => {
+    const images = (reco.data.imageGallery || []).filter((img: string) => img && img.trim() !== '');
+    return {
+        title: reco.data.title,
+        url: `${basePath}/recommendations/${reco.data.permalink || reco.id.split('/').pop()?.replace('.md', '')}`,
+        image: images.length > 0 ? images[0] : null
+    };
+});
+---
+
+<div class="spin-the-wheel-container">
+    <div class="wheel-card">
+        <h3>{t('wheel.title')}</h3>
+        
+        <div class="wheel-result-container" id="wheel-result-container" aria-live="polite">
+            <div id="wheel-default-text" class="wheel-placeholder">
+                <span class="wheel-icon">🎡</span>
+            </div>
+            <div id="wheel-result-content" class="wheel-content hidden">
+                <img id="wheel-result-img" src="" alt="" class="wheel-result-image" />
+                <h4 id="wheel-result-title" class="wheel-result-title"></h4>
+                <a id="wheel-result-link" href="#" class="button button-primary details-link">{t('wheel.link')}</a>
+            </div>
+        </div>
+
+        <button id="spin-button" class="button button-primary spin-btn">{t('wheel.button')}</button>
+    </div>
+</div>
+
+<style>
+    .spin-the-wheel-container {
+        display: flex;
+        justify-content: center;
+        margin-block: 3rem;
+    }
+    
+    .wheel-card {
+        background-color: var(--color-white);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2.5rem;
+        text-align: center;
+        max-width: 450px;
+        width: 100%;
+        border: 2px solid var(--color-brand-blue);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .wheel-card::before {
+        content: '';
+        position: absolute;
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        height: 6px;
+        background: linear-gradient(90deg, var(--color-brand-blue), var(--color-brand-green), var(--color-brand-red));
+    }
+    
+    .wheel-card h3 {
+        font-size: 1.8rem;
+        color: var(--color-text-bright);
+        margin-block-end: 1.5rem;
+    }
+    
+    .wheel-result-container {
+        min-height: 220px;
+        border: 2px dashed var(--color-sand);
+        border-radius: 12px;
+        margin-block-end: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background-color: var(--color-sand-light);
+        transition: all 0.3s ease;
+    }
+    
+    .wheel-result-container.spinning {
+        border-color: var(--color-brand-blue);
+        box-shadow: inset 0 0 15px rgba(0, 140, 255, 0.1);
+    }
+    
+    .wheel-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .wheel-icon {
+        font-size: 4.5rem;
+        animation: rotate 10s linear infinite;
+        display: inline-block;
+    }
+    
+    .wheel-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 1rem;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    .wheel-content.hidden {
+        display: none;
+    }
+    
+    .wheel-result-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .wheel-result-title {
+        font-size: 1.25rem;
+        margin: 0;
+        color: var(--color-text);
+        font-weight: bold;
+    }
+    
+    .spin-btn {
+        font-size: 1.25rem;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        width: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .spin-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 140, 255, 0.3);
+    }
+    
+    .spin-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    .spinning-text {
+        font-size: 1.5rem;
+        color: var(--color-brand-blue);
+        animation: pulse 0.3s infinite alternate;
+    }
+    
+    .details-link {
+        margin-block-start: 0.5rem;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+        from { transform: scale(1); }
+        to { transform: scale(1.05); }
+    }
+</style>
+
+<script define:vars={{ wheelItems }}>
+    document.addEventListener('DOMContentLoaded', () => {
+        const spinButton = document.getElementById('spin-button');
+        const resultContainer = document.getElementById('wheel-result-container');
+        const defaultText = document.getElementById('wheel-default-text');
+        const resultContent = document.getElementById('wheel-result-content');
+        const resultImage = document.getElementById('wheel-result-img');
+        const resultTitle = document.getElementById('wheel-result-title');
+        const resultLink = document.getElementById('wheel-result-link');
+    
+        let isSpinning = false;
+        
+        if (spinButton && wheelItems && wheelItems.length > 0) {
+            spinButton.addEventListener('click', () => {
+                if (isSpinning) return;
+                isSpinning = true;
+                spinButton.disabled = true;
+                
+                // UI state
+                resultContainer.classList.add('spinning');
+                defaultText.style.display = 'none';
+                resultContent.classList.remove('hidden');
+                resultImage.style.display = 'none'; // hide img while spinning
+                resultLink.style.display = 'none';  // hide link while spinning
+                
+                resultTitle.classList.add('spinning-text');
+                
+                let counter = 0;
+                const duration = 2000; // 2 seconds
+                const intervalTime = 100; // 100ms per change
+                const totalChanges = duration / intervalTime;
+                
+                const shuffleInterval = setInterval(() => {
+                    const randomIndex = Math.floor(Math.random() * wheelItems.length);
+                    resultTitle.textContent = wheelItems[randomIndex].title;
+                    counter++;
+                    
+                    if (counter >= totalChanges) {
+                        clearInterval(shuffleInterval);
+                        finishSpin();
+                    }
+                }, intervalTime);
+            });
+            
+            function finishSpin() {
+                const finalIndex = Math.floor(Math.random() * wheelItems.length);
+                const finalItem = wheelItems[finalIndex];
+                
+                resultTitle.classList.remove('spinning-text');
+                resultTitle.textContent = finalItem.title;
+                
+                if (finalItem.image) {
+                    // Astro resolves external URLs or static paths differently.
+                    // Assuming finalItem.image here is the path relative to public or src.
+                    // If it's a string path, standard img src works. 
+                    resultImage.src = finalItem.image;
+                    resultImage.alt = finalItem.title;
+                    resultImage.style.display = 'block';
+                } else {
+                    resultImage.style.display = 'none';
+                }
+                
+                resultLink.href = finalItem.url;
+                resultLink.style.display = 'inline-block';
+                
+                resultContainer.classList.remove('spinning');
+                isSpinning = false;
+                spinButton.disabled = false;
+            }
+        }
+    });
+</script>
