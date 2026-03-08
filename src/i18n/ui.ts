@@ -53,7 +53,7 @@ export const ui = {
         'widget.temp': 'טמפרטורה',
         'widget.waves': 'גובה גלים',
         'wheel.title': 'לא יודעים מה לעשות היום?',
-        'wheel.button': 'סובב את הגלגל!',
+        'wheel.button': 'סובבו את הגלגל!',
         'wheel.link': 'קחו אותי לשם!',
     },
     en: {
