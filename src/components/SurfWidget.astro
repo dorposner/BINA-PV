@@ -1,0 +1,125 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="surf-widget" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+    <h3>{t('widget.title')}</h3>
+    <div class="widget-data">
+        <div class="data-item">
+            <span class="label">{t('widget.temp')}:</span>
+            <span class="value" id="temp-value">...</span>
+        </div>
+        <div class="data-item">
+            <span class="label">{t('widget.waves')}:</span>
+            <span class="value" id="waves-value">...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function fetchWidgetData() {
+        const tempEl = document.getElementById('temp-value');
+        const wavesEl = document.getElementById('waves-value');
+
+        try {
+            const [weatherRes, wavesRes] = await Promise.all([
+                fetch('https://api.open-meteo.com/v1/forecast?latitude=9.6565&longitude=-82.7333&current_weather=true'),
+                fetch('https://marine-api.open-meteo.com/v1/marine?latitude=9.6565&longitude=-82.7333&current=wave_height')
+            ]);
+
+            if (weatherRes.ok) {
+                const weatherData = await weatherRes.json();
+                if (tempEl && weatherData.current_weather) {
+                     const temp = Math.round(weatherData.current_weather.temperature);
+                     tempEl.textContent = `${temp} °C`;
+                }
+            } else if (tempEl) {
+                tempEl.textContent = 'N/A';
+            }
+
+            if (wavesRes.ok) {
+                const wavesData = await wavesRes.json();
+                if (wavesEl && wavesData.current) {
+                     const waves = wavesData.current.wave_height;
+                     wavesEl.textContent = `${waves} m`;
+                }
+            } else if (wavesEl) {
+                wavesEl.textContent = 'N/A';
+            }
+        } catch (error) {
+            console.error('Error fetching widget data:', error);
+            if (tempEl) tempEl.textContent = 'N/A';
+            if (wavesEl) wavesEl.textContent = 'N/A';
+        }
+    }
+
+    // Run on client load
+    fetchWidgetData();
+</script>
+
+<style>
+    .surf-widget {
+        background-color: var(--color-white);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        text-align: center;
+        max-width: 450px;
+        margin: 0 auto;
+        border-top: 5px solid var(--color-brand-blue);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .surf-widget:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .surf-widget h3 {
+        color: var(--color-brand-blue);
+        margin-block-start: 0;
+        margin-block-end: 2rem;
+        font-size: 1.6rem;
+    }
+
+    .widget-data {
+        display: flex;
+        justify-content: space-around;
+        gap: 1.5rem;
+    }
+
+    .data-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: var(--color-sand-light, #f9f8f4); /* Fallback to standard light color if var not found here */
+        padding: 1.25rem 1rem;
+        border-radius: 8px;
+        flex: 1;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .label {
+        font-size: 1rem;
+        color: var(--color-text);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .value {
+        font-size: 1.8rem;
+        color: var(--color-brand-green);
+        font-weight: 700;
+        margin-block-start: 0.5rem;
+    }
+
+    /* RTL support for Hebrew */
+    .surf-widget[dir="rtl"] .widget-data {
+        flex-direction: row; /* Not reverse, let DOM order stand or reverse if desired. Display flex already respects RTL */
+    }
+</style>

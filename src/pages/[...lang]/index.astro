@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import EventCard from '../../components/EventCard.astro';
+import SurfWidget from '../../components/SurfWidget.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getLangFromUrl, useTranslations } from '../../i18n/utils';
@@ -97,6 +98,12 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
             <div class="shabbat-image-wrapper">
                  <Image src={passoverImg} alt="Passover Celebration" class="shabbat-img round-img" />
             </div>
+        </div>
+    </section>
+
+    <section id="surf-widget" class="widget-section">
+        <div class="container">
+            <SurfWidget />
         </div>
     </section>
 </Layout>
@@ -240,6 +247,11 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
         padding-block: 5rem;
         background-color: var(--color-brand-blue);
         color: var(--color-white);
+    }
+
+    .widget-section {
+        padding-block: 4rem;
+        background-color: var(--color-sand-light);
     }
 
     .shabbat-container {
