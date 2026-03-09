@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 interface Props {
@@ -11,6 +12,13 @@ const { title, date, time, description, image, registrationLink } = event.data;
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+
+const allEvents = await getCollection('events');
+const hebrewEvent = allEvents.find((e: any) => e.id.startsWith('he/') && (e.data.permalink === event.data.permalink || e.id.split('/').pop() === event.id.split('/').pop()));
+const hebrewTitle = hebrewEvent ? hebrewEvent.data.title : event.data.title;
+
+const hebrewFormatter = new Intl.DateTimeFormat('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+const hebrewFormattedDate = date ? hebrewFormatter.format(date) : '';
 
 // Generate unique ID for the inputs
 const eventId = Math.random().toString(36).substring(2, 9);
@@ -63,8 +71,8 @@ const formattedDate = date ? formatter.format(date) : '';
                 <p>{formattedDate}{time ? ` | ${time}` : ''}</p>
             </div>
             <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')}>
-                <input type="hidden" name="eventName" value={title} />
-                <input type="hidden" name="eventDate" value={`${formattedDate}${time ? ` | ${time}` : ''}`} />
+                <input type="hidden" name="eventName" value={hebrewTitle} />
+                <input type="hidden" name="eventDate" value={`${hebrewFormattedDate}${time ? ` | ${time}` : ''}`} />
                 
                 <div class="form-group">
                     <label for={`name-${eventId}`}>{t('form.name')} *</label>
