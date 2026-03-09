@@ -90,6 +90,11 @@ const formattedDate = date ? formatter.format(date) : '';
                 </div>
                 
                 <div class="form-group">
+                    <label for={`participants-${eventId}`}>{t('form.participants')}</label>
+                    <input type="number" id={`participants-${eventId}`} name="participants" min="1" value="1" required />
+                </div>
+                
+                <div class="form-group">
                     <label for={`notes-${eventId}`}>{t('form.notes')}</label>
                     <textarea id={`notes-${eventId}`} name="notes" rows="3"></textarea>
                 </div>
