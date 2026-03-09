@@ -5,9 +5,10 @@ import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 interface Props {
   event: any;
+  isPast?: boolean;
 }
 
-const { event } = Astro.props;
+const { event, isPast = false } = Astro.props;
 const { title, date, time, description, image, registrationLink } = event.data;
 
 const lang = getLangFromUrl(Astro.url);
@@ -49,17 +50,19 @@ const formattedDate = date ? formatter.format(date) : '';
         
         {description && <p class="event-description">{description}</p>}
         
-        <div class="event-actions">
-            {registrationLink && registrationLink !== '' && (
-                <a href={registrationLink} class="button button-primary register-button" target="_blank" rel="noopener noreferrer">
-                    {t('event.register')}
-                </a>
-            )}
-            
-            <button class="button share-button" aria-label={t('event.share')} data-title={title} data-text={description || ''} data-url={Astro.url.href} data-msg-copied={t('event.copied')}>
-                {t('event.share')}
-            </button>
-        </div>
+        {!isPast && (
+            <div class="event-actions">
+                {registrationLink && registrationLink !== '' && (
+                    <a href={registrationLink} class="button button-primary register-button" target="_blank" rel="noopener noreferrer">
+                        {t('event.register')}
+                    </a>
+                )}
+                
+                <button class="button share-button" aria-label={t('event.share')} data-title={title} data-text={description || ''} data-url={Astro.url.href} data-msg-copied={t('event.copied')}>
+                    {t('event.share')}
+                </button>
+            </div>
+        )}
     </div>
     
     <dialog class="registration-modal">

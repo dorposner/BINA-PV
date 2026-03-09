@@ -32,7 +32,7 @@ const sortedEvents = pastEvents.sort((a, b) => b.data.date.valueOf() - a.data.da
             <div class="events-grid">
                 {sortedEvents.length > 0 ? (
                     sortedEvents.map(event => (
-                        <EventCard event={event} />
+                        <EventCard event={event} isPast={true} />
                     ))
                 ) : (
                     <p>{t('archive.empty')}</p>
