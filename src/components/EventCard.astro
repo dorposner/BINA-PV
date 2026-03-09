@@ -12,6 +12,9 @@ const { title, date, time, description, image, registrationLink } = event.data;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
+// Generate unique ID for the inputs
+const eventId = Math.random().toString(36).substring(2, 9);
+
 // Formatting the date
 const locale = lang === 'he' ? 'he-IL' : 'en-US';
 const formatter = new Intl.DateTimeFormat(locale, {
@@ -40,7 +43,7 @@ const formattedDate = date ? formatter.format(date) : '';
         
         <div class="event-actions">
             {registrationLink && registrationLink !== '' && (
-                <a href={registrationLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
+                <a href={registrationLink} class="button button-primary register-button" target="_blank" rel="noopener noreferrer">
                     {t('event.register')}
                 </a>
             )}
@@ -50,11 +53,118 @@ const formattedDate = date ? formatter.format(date) : '';
             </button>
         </div>
     </div>
+    
+    <dialog class="registration-modal">
+        <div class="modal-content">
+            <button class="close-modal" aria-label={t('form.close')}>&times;</button>
+            <div class="modal-header">
+                <h4>{t('form.title')}</h4>
+                <p><strong>{title}</strong></p>
+                <p>{formattedDate}{time ? ` | ${time}` : ''}</p>
+            </div>
+            <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')}>
+                <input type="hidden" name="eventName" value={title} />
+                <input type="hidden" name="eventDate" value={`${formattedDate}${time ? ` | ${time}` : ''}`} />
+                
+                <div class="form-group">
+                    <label for={`name-${eventId}`}>{t('form.name')} *</label>
+                    <input type="text" id={`name-${eventId}`} name="name" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for={`phone-${eventId}`}>{t('form.phone')} *</label>
+                    <input type="tel" id={`phone-${eventId}`} name="phone" required dir="ltr" />
+                </div>
+                
+                <div class="form-group">
+                    <label for={`email-${eventId}`}>{t('form.email')}</label>
+                    <input type="email" id={`email-${eventId}`} name="email" dir="ltr" />
+                </div>
+                
+                <div class="form-group">
+                    <label for={`notes-${eventId}`}>{t('form.notes')}</label>
+                    <textarea id={`notes-${eventId}`} name="notes" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="button button-primary submit-register-btn">{t('form.submit')}</button>
+            </form>
+        </div>
+    </dialog>
 </article>
 
 <script>
     // Component scripts run once per page in Astro
     document.addEventListener('DOMContentLoaded', () => {
+        const registerButtons = document.querySelectorAll('.register-button');
+        
+        registerButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const href = button.getAttribute('href') || '';
+                if (href.includes('forms.gle') || href.includes('docs.google.com')) {
+                    e.preventDefault();
+                    const article = button.closest('.event-card');
+                    const modal = article?.querySelector('.registration-modal') as HTMLDialogElement;
+                    if (modal && typeof modal.showModal === 'function') {
+                        modal.showModal();
+                    }
+                }
+            });
+        });
+
+        const closeButtons = document.querySelectorAll('.close-modal');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.registration-modal') as HTMLDialogElement;
+                if (modal && typeof modal.close === 'function') {
+                    modal.close();
+                }
+            });
+        });
+
+        const registrationForms = document.querySelectorAll('.registration-form');
+        registrationForms.forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formEl = e.target as HTMLFormElement;
+                const submitBtn = formEl.querySelector('.submit-register-btn') as HTMLButtonElement;
+                const originalBtnText = submitBtn?.textContent || '';
+                
+                const successMsg = formEl.getAttribute('data-success') || 'Success';
+                const errorMsg = formEl.getAttribute('data-error') || 'Error';
+                
+                if (submitBtn) {
+                    submitBtn.textContent = '...';
+                    submitBtn.disabled = true;
+                }
+                
+                try {
+                    const formData = new FormData(formEl);
+                    
+                    await fetch('https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec', {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: formData
+                    });
+                    
+                    alert(successMsg);
+                    formEl.reset();
+                    
+                    const modal = formEl.closest('.registration-modal') as HTMLDialogElement;
+                    if (modal && typeof modal.close === 'function') {
+                        modal.close();
+                    }
+                } catch (err) {
+                    console.error('Submission error:', err);
+                    alert(errorMsg);
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                }
+            });
+        });
+
         const shareButtons = document.querySelectorAll('.share-button');
         
         shareButtons.forEach(button => {
@@ -131,5 +241,96 @@ const formattedDate = date ? formatter.format(date) : '';
         gap: 1rem;
         align-items: center;
         flex-wrap: wrap;
+    }
+
+    .registration-modal {
+        border: none;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        max-width: 90%;
+        width: 400px;
+    }
+    
+    .registration-modal::backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+        padding: 2rem;
+        position: relative;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        inset-inline-end: 1rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--color-warm-wood);
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .close-modal:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+    
+    .modal-header {
+        margin-block-end: 1.5rem;
+        text-align: center;
+        padding-inline-end: 1rem;
+    }
+    
+    .modal-header h4 {
+        margin-block-end: 0.5rem;
+        color: var(--color-primary);
+        font-size: 1.25rem;
+    }
+    
+    .modal-header p {
+        margin: 0.25rem 0;
+        font-size: 0.95rem;
+        color: var(--color-warm-wood);
+    }
+    
+    .form-group {
+        margin-block-end: 1.25rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-block-end: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(9, 64, 103, 0.1);
+    }
+    
+    .submit-register-btn {
+        width: 100%;
+        margin-block-start: 1rem;
+        padding: 0.75rem;
+        font-size: 1rem;
     }
 </style>
