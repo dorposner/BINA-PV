@@ -54,5 +54,5 @@ collections:
       - {label: "תאריך (Date)", name: "date", widget: "datetime", i18n: duplicate}
       - {label: "תיאור קצר (Description)", name: "description", widget: "text", required: false, i18n: true}
       - {label: "תמונה ראשית (Main Image)", name: "image", widget: "image", required: false, i18n: duplicate}
-      - {label: "מאת (Author)", name: "author", widget: "string", required: false, i18n: duplicate}
+      - {label: "מאת (Author)", name: "author", widget: "string", required: false, i18n: true}
       - {label: "תוכן הפוסט (Body)", name: "body", widget: "markdown", i18n: true}
