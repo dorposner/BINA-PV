@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { title, description, image, date } = post.data;
+const { title, description, image, date, author } = post.data;
 const { Content } = await post.render();
 
 const lang = getLangFromUrl(Astro.url);
@@ -39,6 +39,7 @@ const formattedDate = new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-US',
         <header class="post-header">
             <a href={`${basePath}/blog`} class="back-link">{lang === 'he' ? '← חזרה לבלוג' : '← Back to Blog'}</a>
             <h1>{title}</h1>
+            {author && <p class="post-author" style="font-weight: bold; color: var(--color-brand-blue);">{t('blog.by')} {author}</p>}
             <time class="post-date">{formattedDate}</time>
         </header>
 

@@ -12,6 +12,7 @@ interface Props {
 
 const { title, description = "בית קהילת בינ״ה בפוארטו וייחו, קוסטה ריקה. הבית הישראלי-יהודי שלכם למפגש, קבלות שבת, ארוחות קהילתיות והמלצות למטיילים.", image = "https://bina.kesher.me/og-image.png" } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
+const siteTitle = lang === 'he' ? 'בית בינה פורטו וייחו' : 'BINA Puerto Viejo';
 const t = useTranslations(lang);
 const dir = useDir(lang);
 const basePath = lang === 'he' ? '' : '/' + lang;
@@ -23,7 +24,7 @@ const basePath = lang === 'he' ? '' : '/' + lang;
 		<meta charset="UTF-8" />
 		<meta name="google-site-verification" content="RYgMh40MVQ6JqgAP3Ks7-JQBrbUp2idX2raAjajqrv0" />
 		<meta name="description" content={description} />
-		<meta property="og:title" content={`${title} | BINA Puerto Viejo`} />
+		<meta property="og:title" content={`${title} | ${siteTitle}`} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={image} />
 		<meta property="og:url" content="https://bina.kesher.me/" />
@@ -36,7 +37,7 @@ const basePath = lang === 'he' ? '' : '/' + lang;
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
-		<title>{title} | בית בינה פורטו וייחו</title>
+		<title>{title} | {siteTitle}</title>
 	</head>
 	<body>
         <header class="site-header">
