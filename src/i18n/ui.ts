@@ -7,6 +7,7 @@ export const defaultLang = 'he';
 
 export const ui = {
     he: {
+        'site.description': 'בית בינ"ה בפוארטו ויאחו (פורטו וייחו), קוסטה ריקה. הבית הישראלי שלכם במרכז אמריקה למפגש, קבלות שבת, ארוחות קהילתיות, חגים והמלצות למטיילים.',
         'nav.home': 'ראשי',
         'nav.about': 'אודות',
         'nav.schedule': 'לוח אירועים',
@@ -69,6 +70,7 @@ export const ui = {
         'form.close': 'סגור',
     },
     en: {
+        'site.description': 'BINA Community House in Puerto Viejo, Costa Rica. Your Israeli-Jewish home in Central America for Shabbat dinners, holidays, community meetups, and travel recommendations.',
         'nav.home': 'Home',
         'nav.about': 'About',
         'nav.schedule': 'Events Schedule',
