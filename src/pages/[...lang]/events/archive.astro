@@ -15,8 +15,9 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 const allEvents = await getCollection('events');
-const cutoffDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
-const pastEvents = allEvents.filter(entry => entry.id.startsWith(`${lang}/`) && entry.data.date < cutoffDate);
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const pastEvents = allEvents.filter(entry => entry.id.startsWith(`${lang}/`) && entry.data.date < today);
 // Sort by date descending (most recent first)
 const sortedEvents = pastEvents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
