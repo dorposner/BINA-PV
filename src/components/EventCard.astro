@@ -52,8 +52,12 @@ const formattedDate = date ? formatter.format(date) : '';
         
         {!isPast && (
             <div class="event-actions">
-                {registrationLink && registrationLink !== '' && (
-                    <a href={registrationLink} class="button button-primary register-button" target="_blank" rel="noopener noreferrer">
+                {registrationLink && registrationLink !== '' ? (
+                    <a href={registrationLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
+                        {t('event.register')}
+                    </a>
+                ) : (
+                    <a href="#register" class="button button-primary register-btn open-modal-trigger">
                         {t('event.register')}
                     </a>
                 )}
@@ -111,18 +115,15 @@ const formattedDate = date ? formatter.format(date) : '';
 <script>
     // Component scripts run once per page in Astro
     document.addEventListener('DOMContentLoaded', () => {
-        const registerButtons = document.querySelectorAll('.register-button');
+        const registerButtons = document.querySelectorAll('.open-modal-trigger');
         
         registerButtons.forEach(button => {
             button.addEventListener('click', (e) => {
-                const href = button.getAttribute('href') || '';
-                if (href.includes('forms.gle') || href.includes('docs.google.com')) {
-                    e.preventDefault();
-                    const article = button.closest('.event-card');
-                    const modal = article?.querySelector('.registration-modal') as HTMLDialogElement;
-                    if (modal && typeof modal.showModal === 'function') {
-                        modal.showModal();
-                    }
+                e.preventDefault();
+                const article = button.closest('.event-card');
+                const modal = article?.querySelector('.registration-modal') as HTMLDialogElement;
+                if (modal && typeof modal.showModal === 'function') {
+                    modal.showModal();
                 }
             });
         });
