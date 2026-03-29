@@ -20,7 +20,6 @@ const t = useTranslations(lang);
 import treeImg from '../../assets/images/tree.png';
 import posnerImg from '../../assets/images/posnerfamily.png';
 import shabbatImg from '../../assets/images/shabbat.png';
-import passoverImg from '../../assets/images/passover.png';
 
 const allEvents = await getCollection('events');
 const today = new Date();
@@ -90,20 +89,7 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
         </div>
     </section>
 
-    <section id="passover" class="passover-section">
-        <div class="container shabbat-container passover-container">
-            <div class="shabbat-content passover-content">
-                <h2>{t('passover.title')}</h2>
-                <p>{t('passover.desc')}</p>
-                <div class="shabbat-actions passover-actions">
-                    <a href="https://bit.ly/4aGlgUY" class="button button-primary" target="_blank" rel="noopener noreferrer">{t('passover.cta')}</a>
-                </div>
-            </div>
-            <div class="shabbat-image-wrapper">
-                 <Image src={passoverImg} alt="Passover Celebration" class="shabbat-img round-img" />
-            </div>
-        </div>
-    </section>
+
 
     <section id="surf-widget" class="widget-section">
         <div class="container">

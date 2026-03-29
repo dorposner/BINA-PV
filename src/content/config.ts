@@ -10,6 +10,7 @@ const eventsCollection = defineCollection({
         description: z.string().optional(),
         image: z.string().optional(),
         registrationLink: z.string().url().optional().or(z.literal('')),
+        hide_registration: z.boolean().default(false).optional(),
     }),
 });
 

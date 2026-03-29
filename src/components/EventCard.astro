@@ -52,14 +52,16 @@ const formattedDate = date ? formatter.format(date) : '';
         
         {!isPast && (
             <div class="event-actions">
-                {registrationLink && registrationLink !== '' ? (
-                    <a href={registrationLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
-                        {t('event.register')}
-                    </a>
-                ) : (
-                    <a href="#register" class="button button-primary register-btn open-modal-trigger">
-                        {t('event.register')}
-                    </a>
+                {!event.data.hide_registration && (
+                    registrationLink && registrationLink !== '' ? (
+                        <a href={registrationLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
+                            {t('event.register')}
+                        </a>
+                    ) : (
+                        <a href="#register" class="button button-primary register-btn open-modal-trigger">
+                            {t('event.register')}
+                        </a>
+                    )
                 )}
                 
                 <button class="button share-button" aria-label={t('event.share')} data-title={title} data-text={description || ''} data-url={Astro.url.href} data-msg-copied={t('event.copied')}>
