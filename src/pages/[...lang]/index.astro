@@ -5,12 +5,13 @@ import SurfWidget from '../../components/SurfWidget.astro';
 import SpinTheWheel from '../../components/SpinTheWheel.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
-import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../../i18n/utils';
 
 export function getStaticPaths() {
   return [
     { params: { lang: undefined } },
     { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
   ];
 }
 
@@ -24,7 +25,8 @@ import shabbatImg from '../../assets/images/shabbat.png';
 const allEvents = await getCollection('events');
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-const events = allEvents.filter(entry => entry.id.startsWith(`${lang}/`) && entry.data.date >= today);
+const rawEvents = getFallbackCollectionItems(lang, allEvents);
+const events = rawEvents.filter(entry => entry.data.date >= today);
 // Sort by date ascending
 const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
 ---

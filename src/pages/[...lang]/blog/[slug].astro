@@ -2,21 +2,24 @@
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
-import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../../../i18n/utils';
 
 export async function getStaticPaths() {
     const posts = await getCollection('blog');
     
-    return [
-       ...posts.filter(p => p.id.startsWith('he/')).map(post => ({
-           params: { lang: undefined, slug: post.data.permalink || post.id.split('/').pop().replace('.md', '') },
-           props: { post }
-       })),
-       ...posts.filter(p => p.id.startsWith('en/')).map(post => ({
-           params: { lang: 'en', slug: post.data.permalink || post.id.split('/').pop().replace('.md', '') },
-           props: { post }
-       }))
+    const locales = [
+        { lang: undefined, id: 'he' },
+        { lang: 'en', id: 'en' },
+        { lang: 'es', id: 'es' }
     ];
+    
+    return locales.flatMap(locale => {
+        const items = getFallbackCollectionItems(locale.id, posts);
+        return items.map(post => ({
+            params: { lang: locale.lang, slug: post.data.permalink || post.id.split('/').pop().replace('.md', '') },
+            props: { post }
+        }));
+    });
 }
 
 const { post } = Astro.props;

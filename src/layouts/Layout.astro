@@ -69,7 +69,28 @@ const basePath = lang === 'he' ? '' : '/' + lang;
                         <li><a href={`${basePath}/events/archive`}>{t('nav.archive')}</a></li>
                         <li><a href={`${basePath}/recommendations`}>{t('nav.recommendations')}</a></li>
                         <li><a href={`${basePath}/blog`}>{t('nav.blog')}</a></li>
-                        <li class="lang-switcher-item"><a href={t('langSwitcher.url')} class="lang-switcher-link">{t('langSwitcher.title')}</a></li>
+                        {
+                            [
+                                { code: 'he', label: 'HE', basePath: '/' },
+                                { code: 'en', label: 'EN', basePath: '/en' },
+                                { code: 'es', label: 'ES', basePath: '/es' }
+                            ].filter(l => l.code !== lang).map(l => {
+                                // Keep the current path but switch language prefix
+                                let path = Astro.url.pathname;
+                                if (path.startsWith('/en/')) path = path.replace('/en/', '/');
+                                else if (path === '/en') path = '/';
+                                else if (path.startsWith('/es/')) path = path.replace('/es/', '/');
+                                else if (path === '/es') path = '/';
+                                
+                                const targetUrl = l.code === 'he' ? path : (path === '/' ? l.basePath : `${l.basePath}${path}`);
+                                
+                                return (
+                                    <li class="lang-switcher-item">
+                                        <a href={targetUrl} class="lang-switcher-link">{l.label}</a>
+                                    </li>
+                                )
+                            })
+                        }
                     </ul>
                 </nav>
             </div>

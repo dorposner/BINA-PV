@@ -2,12 +2,13 @@
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
-import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../../../i18n/utils';
 
 export function getStaticPaths() {
   return [
     { params: { lang: undefined } },
     { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
   ];
 }
 
@@ -16,7 +17,7 @@ const t = useTranslations(lang);
 const basePath = lang === 'he' ? '' : '/' + lang;
 
 const allRecommendations = await getCollection('recommendations');
-const recommendations = allRecommendations.filter(entry => entry.id.startsWith(`${lang}/`));
+const recommendations = getFallbackCollectionItems(lang, allRecommendations);
 ---
 
 <Layout title={t('recs.title')} description={t('recs.subtitle')}>

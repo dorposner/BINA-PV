@@ -2,12 +2,13 @@
 import Layout from '../../../layouts/Layout.astro';
 import EventCard from '../../../components/EventCard.astro';
 import { getCollection } from 'astro:content';
-import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../../../i18n/utils';
 
 export function getStaticPaths() {
   return [
     { params: { lang: undefined } },
     { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
   ];
 }
 
@@ -15,9 +16,10 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 const allEvents = await getCollection('events');
+const rawEvents = getFallbackCollectionItems(lang, allEvents);
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-const pastEvents = allEvents.filter(entry => entry.id.startsWith(`${lang}/`) && entry.data.date < today);
+const pastEvents = rawEvents.filter(entry => entry.data.date < today);
 // Sort by date descending (most recent first)
 const sortedEvents = pastEvents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---

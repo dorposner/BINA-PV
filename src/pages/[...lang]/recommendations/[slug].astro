@@ -2,21 +2,24 @@
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
-import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../../../i18n/utils';
 
 export async function getStaticPaths() {
     const recommendations = await getCollection('recommendations');
     
-    return [
-       ...recommendations.filter(r => r.id.startsWith('he/')).map(reco => ({
-           params: { lang: undefined, slug: reco.data.permalink || reco.id.split('/').pop().replace('.md', '') },
-           props: { reco }
-       })),
-       ...recommendations.filter(r => r.id.startsWith('en/')).map(reco => ({
-           params: { lang: 'en', slug: reco.data.permalink || reco.id.split('/').pop().replace('.md', '') },
-           props: { reco }
-       }))
+    const locales = [
+        { lang: undefined, id: 'he' },
+        { lang: 'en', id: 'en' },
+        { lang: 'es', id: 'es' }
     ];
+    
+    return locales.flatMap(locale => {
+        const items = getFallbackCollectionItems(locale.id, recommendations);
+        return items.map(reco => ({
+            params: { lang: locale.lang, slug: reco.data.permalink || reco.id.split('/').pop().replace('.md', '') },
+            props: { reco }
+        }));
+    });
 }
 
 const { reco } = Astro.props;
