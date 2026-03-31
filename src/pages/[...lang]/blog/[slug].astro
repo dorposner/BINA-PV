@@ -30,7 +30,8 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const basePath = lang === 'he' ? '' : '/' + lang;
 
-const formattedDate = new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-US', {
+const locale = lang === 'he' ? 'he-IL' : lang === 'es' ? 'es-CR' : 'en-US';
+const formattedDate = new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

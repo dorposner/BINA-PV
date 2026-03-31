@@ -25,7 +25,7 @@ const hebrewFormattedDate = date ? hebrewFormatter.format(date) : '';
 const eventId = Math.random().toString(36).substring(2, 9);
 
 // Formatting the date
-const locale = lang === 'he' ? 'he-IL' : 'en-US';
+const locale = lang === 'he' ? 'he-IL' : lang === 'es' ? 'es-CR' : 'en-US';
 const formatter = new Intl.DateTimeFormat(locale, {
   weekday: 'long', 
   year: 'numeric', 

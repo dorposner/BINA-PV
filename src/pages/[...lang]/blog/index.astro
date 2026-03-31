@@ -30,7 +30,8 @@ const posts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueO
         {posts.length > 0 ? (
             posts.map(post => {
                 const img = post.data.image && post.data.image.trim() !== '' ? post.data.image : null;
-                const formattedDate = new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-US', {
+                const locale = lang === 'he' ? 'he-IL' : lang === 'es' ? 'es-CR' : 'en-US';
+                const formattedDate = new Intl.DateTimeFormat(locale, {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
