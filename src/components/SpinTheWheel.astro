@@ -1,13 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
-import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const basePath = lang === 'he' ? '' : '/' + lang;
 
 const allRecommendations = await getCollection('recommendations');
-const recommendations = allRecommendations.filter((entry: any) => entry.id.startsWith(`${lang}/`));
+const recommendations = getFallbackCollectionItems(lang, allRecommendations);
 
 const wheelItems = recommendations.map((reco: any) => {
     const images = (reco.data.imageGallery || []).filter((img: string) => img && img.trim() !== '');
