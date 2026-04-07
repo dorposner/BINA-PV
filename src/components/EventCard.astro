@@ -53,15 +53,9 @@ const formattedDate = date ? formatter.format(date) : '';
         {!isPast && (
             <div class="event-actions">
                 {!event.data.hide_registration && (
-                    registrationLink && registrationLink !== '' ? (
-                        <a href={registrationLink} class="button button-primary" target="_blank" rel="noopener noreferrer">
-                            {t('event.register')}
-                        </a>
-                    ) : (
-                        <a href="#register" class="button button-primary register-btn open-modal-trigger">
-                            {t('event.register')}
-                        </a>
-                    )
+                    <a href="#register" class="button button-primary register-btn open-modal-trigger">
+                        {t('event.register')}
+                    </a>
                 )}
                 
                 <button class="button share-button" aria-label={t('event.share')} data-title={title} data-text={description || ''} data-url={Astro.url.href} data-msg-copied={t('event.copied')}>
@@ -79,7 +73,7 @@ const formattedDate = date ? formatter.format(date) : '';
                 <p><strong>{title}</strong></p>
                 <p>{formattedDate}{time ? ` | ${time}` : ''}</p>
             </div>
-            <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')}>
+            <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')} data-redirecting={t('form.redirecting')} data-redirect-url={registrationLink && registrationLink !== '' ? registrationLink : ''}>
                 <input type="hidden" name="eventName" value={hebrewTitle} />
                 <input type="hidden" name="eventDate" value={`${hebrewFormattedDate}${time ? ` | ${time}` : ''}`} />
                 
@@ -150,6 +144,8 @@ const formattedDate = date ? formatter.format(date) : '';
                 
                 const successMsg = formEl.getAttribute('data-success') || 'Success';
                 const errorMsg = formEl.getAttribute('data-error') || 'Error';
+                const redirectingMsg = formEl.getAttribute('data-redirecting') || 'Redirecting...';
+                const redirectUrl = formEl.getAttribute('data-redirect-url');
                 
                 if (submitBtn) {
                     submitBtn.textContent = '...';
@@ -165,18 +161,25 @@ const formattedDate = date ? formatter.format(date) : '';
                         body: formData
                     });
                     
-                    alert(successMsg);
-                    formEl.reset();
-                    
-                    const modal = formEl.closest('.registration-modal') as HTMLDialogElement;
-                    if (modal && typeof modal.close === 'function') {
-                        modal.close();
+                    if (redirectUrl) {
+                        alert(redirectingMsg);
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 2000);
+                    } else {
+                        alert(successMsg);
+                        formEl.reset();
+                        
+                        const modal = formEl.closest('.registration-modal') as HTMLDialogElement;
+                        if (modal && typeof modal.close === 'function') {
+                            modal.close();
+                        }
                     }
                 } catch (err) {
                     console.error('Submission error:', err);
                     alert(errorMsg);
                 } finally {
-                    if (submitBtn) {
+                    if (!redirectUrl && submitBtn) {
                         submitBtn.textContent = originalBtnText;
                         submitBtn.disabled = false;
                     }
