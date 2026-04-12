@@ -108,7 +108,10 @@ const basePath = lang === 'he' ? '' : '/' + lang;
                     <a href="https://chat.whatsapp.com/DVKzxGkoH9AAf3mL7IGd3p" class="whatsapp-link" target="_blank" rel="noopener noreferrer">{t('footer.whatsapp')}</a>
                     <a href="https://bina.org.il" target="_blank" rel="noopener noreferrer">{t('footer.bina_site')}</a>
                 </div>
-                <p>&copy; {new Date().getFullYear()} {t('footer.rights')}</p>
+                <p>
+                    &copy; {new Date().getFullYear()} {t('footer.rights')}
+                    <a href="https://shithead.kesher.me/" target="_blank" rel="noopener noreferrer" class="easter-egg-link" title="Play Shithead Online">🃏</a>
+                </p>
             </div>
         </footer>
 
@@ -271,5 +274,19 @@ const basePath = lang === 'he' ? '' : '/' + lang;
             justify-content: center;
             gap: 2rem;
         }
+    }
+
+    .easter-egg-link {
+        display: inline-block;
+        opacity: 0.3;
+        text-decoration: none !important;
+        margin-left: 0.5rem;
+        font-size: 1.2rem;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .easter-egg-link:hover {
+        opacity: 1;
+        transform: scale(1.2) rotate(10deg);
     }
 </style>
