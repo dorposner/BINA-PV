@@ -29,6 +29,11 @@ const rawEvents = getFallbackCollectionItems(lang, allEvents);
 const events = rawEvents.filter(entry => entry.data.date >= today);
 // Sort by date ascending
 const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+
+const basePath = lang === 'he' ? '' : '/' + lang;
+const allPosts = await getCollection('blog');
+const rawPosts = getFallbackCollectionItems(lang, allPosts);
+const latestPosts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).slice(0, 3);
 ---
 
 <Layout title={t('nav.home')} description={t('about.p1')}>
@@ -75,6 +80,46 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
     </section>
 
     <SpinTheWheel />
+
+    <section id="latest-blog" class="blog-section">
+        <div class="container">
+            <h2>{t('home.blogTitle')}</h2>
+            <div class="blog-grid">
+                {latestPosts.length > 0 ? (
+                    latestPosts.map(post => {
+                        const img = post.data.image && post.data.image.trim() !== '' ? post.data.image : null;
+                        const locale = lang === 'he' ? 'he-IL' : lang === 'es' ? 'es-CR' : 'en-US';
+                        const formattedDate = new Intl.DateTimeFormat(locale, {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }).format(post.data.date);
+                        
+                        return (
+                        <article class="blog-card">
+                            {img && (
+                                <div class="blog-image-wrapper">
+                                    <Image src={img} alt={post.data.title} width={600} height={400} class="blog-image" />
+                                </div>
+                            )}
+                            <div class="blog-content">
+                                <h3>{post.data.title}</h3>
+                                <span class="blog-date">{formattedDate}</span>
+                                {post.data.description && <p class="blog-desc">{post.data.description}</p>}
+                                <a href={`${basePath}/blog/${post.data.permalink || post.id.split('/').pop().replace('.md', '')}`} class="button button-primary details-link">{t('recs.readmore')}</a>
+                            </div>
+                        </article>
+                        );
+                    })
+                ) : (
+                    <p class="no-posts">{t('blog.empty')}</p>
+                )}
+            </div>
+            <div class="view-all-blog">
+                <a href={`${basePath}/blog`} class="view-all-link">{t('home.viewAllBlog')}</a>
+            </div>
+        </div>
+    </section>
 
     <section id="shabbat-passover" class="shabbat-section">
         <div class="container shabbat-container">
@@ -244,6 +289,124 @@ const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.v
     .widget-section {
         padding-block: 4rem;
         background-color: var(--color-sand-light);
+    }
+
+    .blog-section {
+        padding-block: 5rem;
+        background-color: var(--color-white);
+    }
+
+    .blog-section h2 {
+        text-align: center;
+        margin-block-end: 2.5rem;
+        font-size: 2.2rem;
+        color: var(--color-jungle-green);
+    }
+
+    .blog-grid {
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 768px) {
+        .blog-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .blog-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .blog-card {
+        background-color: var(--color-sand-light);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid var(--color-sand);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+    }
+
+    .blog-image-wrapper {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .blog-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .blog-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .blog-content h3 {
+        margin-block-start: 0;
+        margin-block-end: 0.5rem;
+        font-size: 1.25rem;
+        color: var(--color-jungle-green);
+    }
+    
+    .blog-date {
+        color: var(--color-warm-wood);
+        font-size: 0.9rem;
+        margin-block-end: 1rem;
+    }
+    
+    .blog-desc {
+        margin-block-start: 0;
+        margin-block-end: 1.5rem;
+        line-height: 1.5;
+        color: var(--color-text);
+    }
+
+    .details-link {
+        margin-block-start: auto;
+    }
+
+    .no-posts {
+        text-align: center;
+        grid-column: 1 / -1;
+        font-size: 1.1rem;
+        color: var(--color-warm-wood);
+    }
+
+    .view-all-blog {
+        text-align: center;
+        margin-block-start: 3rem;
+    }
+
+    .view-all-link {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--color-brand-blue);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        padding: 0.5rem 1.5rem;
+        border: 2px solid var(--color-brand-blue);
+        border-radius: 4px;
+    }
+
+    .view-all-link:hover {
+        background-color: var(--color-brand-blue);
+        color: var(--color-white);
     }
 
     .shabbat-container {

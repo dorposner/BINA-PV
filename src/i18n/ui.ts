@@ -73,6 +73,8 @@ export const ui = {
         'form.redirecting': 'הפרטים נשמרו! מעביר אותך כעת לרישום חיצוני או תשלום...',
         'form.error': 'אירעה שגיאה בשליחה. אנא נסו שוב.',
         'form.close': 'סגור',
+        'home.blogTitle': 'מהבלוג שלנו',
+        'home.viewAllBlog': 'לכל הכתבות בבלוג ←',
     },
     en: {
         'site.description': 'BINA Community House in Puerto Viejo, Costa Rica. Your Israeli-Jewish home in Central America for Shabbat dinners, holidays, community meetups, and travel recommendations.',
@@ -140,6 +142,8 @@ export const ui = {
         'form.redirecting': 'Details saved! Redirecting to external registration or payment...',
         'form.error': 'An error occurred. Please try again.',
         'form.close': 'Close',
+        'home.blogTitle': 'Latest from our Blog',
+        'home.viewAllBlog': 'View all blog posts ←',
     },
     es: {
         'site.description': 'BINA Casa Comunitaria en Puerto Viejo, Costa Rica. Tu hogar judío-israelí en América Central para cenas de Shabat, festividades, encuentros comunitarios y recomendaciones de viaje.',
@@ -207,5 +211,7 @@ export const ui = {
         'form.redirecting': '¡Datos guardados! Redirigiendo al registro externo o pago...',
         'form.error': 'Ocurrió un error. Por favor, inténtalo de nuevo.',
         'form.close': 'Cerrar',
+        'home.blogTitle': 'Últimas entradas del Blog',
+        'home.viewAllBlog': 'Ver todas las publicaciones ←',
     },
 } as const;
