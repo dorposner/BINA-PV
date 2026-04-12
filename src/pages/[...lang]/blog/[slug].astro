@@ -57,7 +57,7 @@ const formattedDate = new Intl.DateTimeFormat(locale, {
             <Content />
         </div>
 
-        <PostEngagement url={Astro.url.href} title={title} />
+        <PostEngagement url={Astro.url.href} title={title} slug={Astro.params.slug as string} />
     </article>
 </Layout>
 

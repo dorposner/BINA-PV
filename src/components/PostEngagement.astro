@@ -4,20 +4,24 @@ import { getLangFromUrl, useTranslations } from '../i18n/utils';
 interface Props {
     url: string;
     title: string;
+    slug: string;
 }
 
-const { url, title } = Astro.props;
+const { url, title, slug } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 ---
 
-<div class="post-engagement">
+<div class="post-engagement" data-slug={slug}>
     <div class="like-section">
         <button id="like-button" class="like-btn" aria-label={t('blog.like')}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-icon"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
             <span class="like-text">{t('blog.like')}</span>
         </button>
-        <span id="like-count" class="like-count"></span>
+        <div class="like-count-container">
+            <span id="like-count" class="like-count" style="display: none;"></span>
+            <div id="like-spinner" class="spinner"></div>
+        </div>
     </div>
 
     <div class="share-section">
@@ -40,6 +44,9 @@ const t = useTranslations(lang);
 </div>
 
 <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
+    
+    // Share functionality
     const nativeShareBtn = document.getElementById('share-native');
     const copyLinkBtn = document.getElementById('copy-link');
 
@@ -72,30 +79,72 @@ const t = useTranslations(lang);
         });
     });
 
+    // Like functionality
+    const container = document.querySelector('.post-engagement');
+    const slug = container?.getAttribute('data-slug');
     const likeBtn = document.getElementById('like-button');
     const likeCountSpan = document.getElementById('like-count');
+    const spinner = document.getElementById('like-spinner');
     
-    // Set static random initial count for now
-    let currentCount = Math.floor(Math.random() * 38) + 5;
+    let currentCount = 0;
     let hasLiked = false;
+    let isFetching = false;
 
-    if (likeCountSpan) {
-        likeCountSpan.textContent = currentCount.toString();
+    async function fetchLikes() {
+        if (!slug || !likeCountSpan || !spinner) return;
+        
+        try {
+            const res = await fetch(`${GAS_URL}?action=getLikes&slug=${slug}`);
+            const data = await res.json();
+            if (data && typeof data.likes === 'number') {
+                currentCount = data.likes;
+                likeCountSpan.textContent = currentCount.toString();
+            } else {
+                likeCountSpan.textContent = "0";
+            }
+        } catch (err) {
+            console.error('Error fetching likes:', err);
+            likeCountSpan.textContent = "0";
+        } finally {
+            spinner.style.display = 'none';
+            likeCountSpan.style.display = 'inline';
+            likeCountSpan.style.animation = 'fadeIn 0.3s ease forwards';
+        }
     }
 
-    likeBtn?.addEventListener('click', () => {
-        if (!hasLiked) {
-            currentCount++;
+    // Call on mount
+    if (slug) fetchLikes();
+
+    likeBtn?.addEventListener('click', async () => {
+        if (!hasLiked && !isFetching && slug) {
+            isFetching = true;
             hasLiked = true;
-            if (likeCountSpan) {
-                likeCountSpan.textContent = currentCount.toString();
-            }
             likeBtn.classList.add('liked');
             
+            // Interaction animation
             likeBtn.style.transform = 'scale(1.1)';
             setTimeout(() => {
                 likeBtn.style.transform = 'scale(1)';
             }, 200);
+
+            // Optimistic update
+            currentCount++;
+            if (likeCountSpan) {
+                likeCountSpan.textContent = currentCount.toString();
+            }
+
+            try {
+                const res = await fetch(`${GAS_URL}?action=incrementLike&slug=${slug}`);
+                const data = await res.json();
+                if (data && typeof data.likes === 'number') {
+                    currentCount = data.likes;
+                    if (likeCountSpan) likeCountSpan.textContent = currentCount.toString();
+                }
+            } catch (err) {
+                console.error('Error incrementing likes:', err);
+            } finally {
+                isFetching = false;
+            }
         }
     });
 </script>
@@ -141,7 +190,7 @@ const t = useTranslations(lang);
         transition: all 0.2s ease;
     }
 
-    .like-btn:hover {
+    .like-btn:not(:disabled):hover {
         background: var(--color-sand, #F5F1E7);
     }
 
@@ -155,11 +204,37 @@ const t = useTranslations(lang);
         fill: currentColor;
     }
 
+    .like-count-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 24px;
+    }
+
     .like-count {
         font-size: 1.1rem;
         font-weight: 700;
         color: var(--color-text, #333);
-        min-width: 2rem;
+        opacity: 0;
+    }
+
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(26, 70, 133, 0.2);
+        border-top: 2px solid var(--color-brand-blue, #1A4685);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
     }
 
     .share-section {
