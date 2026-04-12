@@ -140,6 +140,8 @@ const formattedDate = date ? formatter.format(date) : '';
         registrationForms.forEach(form => {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                console.log('Submit event triggered for form:', form);
+                
                 const formEl = e.target as HTMLFormElement;
                 const submitBtn = formEl.querySelector('.submit-register-btn') as HTMLButtonElement;
                 const originalBtnText = submitBtn?.textContent || '';
@@ -149,6 +151,8 @@ const formattedDate = date ? formatter.format(date) : '';
                 const redirectingMsg = formEl.getAttribute('data-redirecting') || 'Redirecting...';
                 const redirectUrl = formEl.getAttribute('data-redirect-url');
                 
+                console.log('Form Context:', { successMsg, errorMsg, redirectingMsg, redirectUrl });
+                
                 if (submitBtn) {
                     submitBtn.textContent = '...';
                     submitBtn.disabled = true;
@@ -156,20 +160,42 @@ const formattedDate = date ? formatter.format(date) : '';
                 
                 try {
                     const formData = new FormData(formEl);
+                    console.log('--- Form Submission Started ---');
                     
-                    await fetch('https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec', {
+                    const formEntries: Record<string, any> = {};
+                    for (let [key, value] of formData.entries()) {
+                        formEntries[key] = value;
+                    }
+                    console.log('Form Data entries:', formEntries);
+                    
+                    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
+                    console.log('Sending POST request to:', scriptUrl);
+                    
+                    // Sending the request using no-cors
+                    const response = await fetch(scriptUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         body: formData
                     });
                     
-                    if (redirectUrl) {
-                        alert(redirectingMsg);
-                        setTimeout(() => {
-                            window.location.href = redirectUrl;
-                        }, 2000);
+                    console.log('Fetch request completed.');
+                    console.log('Response type (opaque expected due to no-cors):', response.type);
+                    
+                    if (redirectUrl && redirectUrl.trim() !== '') {
+                        console.log('Redirecting to external URL:', redirectUrl);
+                        // Make sure we use standard browser alert and timeout safely
+                        requestAnimationFrame(() => {
+                            alert(redirectingMsg);
+                            setTimeout(() => {
+                                window.location.href = redirectUrl;
+                            }, 1500); // reduced timeout slightly for better UX
+                        });
                     } else {
-                        alert(successMsg);
+                        console.log('No redirect URL provided. Showing success alert.');
+                        requestAnimationFrame(() => {
+                            alert(successMsg);
+                        });
+                        
                         formEl.reset();
                         
                         const modal = formEl.closest('.registration-modal') as HTMLDialogElement;
@@ -178,12 +204,15 @@ const formattedDate = date ? formatter.format(date) : '';
                         }
                     }
                 } catch (err) {
-                    console.error('Submission error:', err);
-                    alert(errorMsg);
+                    console.error('Submission error intercepted:', err);
+                    alert(`${errorMsg} - Check console for details.`);
                 } finally {
-                    if (!redirectUrl && submitBtn) {
-                        submitBtn.textContent = originalBtnText;
-                        submitBtn.disabled = false;
+                    console.log('--- Form Submission Finished ---');
+                    if (!redirectUrl || redirectUrl.trim() === '') {
+                        if (submitBtn) {
+                            submitBtn.textContent = originalBtnText;
+                            submitBtn.disabled = false;
+                        }
                     }
                 }
             });
