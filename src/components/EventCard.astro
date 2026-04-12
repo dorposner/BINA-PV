@@ -48,7 +48,7 @@ const formattedDate = date ? formatter.format(date) : '';
             {time && <span> | {time}</span>}
         </p>
         
-        {description && <p class="event-description">{description}</p>}
+        {description && <p class="event-description" set:html={description}></p>}
         
         {!isPast && (
             <div class="event-actions">
