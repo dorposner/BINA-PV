@@ -159,23 +159,16 @@ const formattedDate = date ? formatter.format(date) : '';
                 }
                 
                 try {
-                    const formData = new FormData(formEl);
                     console.log('--- Form Submission Started ---');
-                    
-                    const formEntries: Record<string, any> = {};
-                    for (let [key, value] of formData.entries()) {
-                        formEntries[key] = value;
-                    }
-                    console.log('Form Data entries:', formEntries);
                     
                     const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
                     console.log('Sending POST request to:', scriptUrl);
                     
-                    // Sending the request using no-cors
+                    // Sending the request using no-cors with raw FormData
                     await fetch(scriptUrl, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: formData
+                        body: new FormData(formEl)
                     });
                     
                     console.log('Fetch request completed (opaque response).');
