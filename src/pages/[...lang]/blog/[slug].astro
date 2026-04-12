@@ -1,8 +1,8 @@
----
 import Layout from '../../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getLangFromUrl, useTranslations, getFallbackCollectionItems } from '../../../i18n/utils';
+import PostEngagement from '../../../components/PostEngagement.astro';
 
 export async function getStaticPaths() {
     const posts = await getCollection('blog');
@@ -56,6 +56,8 @@ const formattedDate = new Intl.DateTimeFormat(locale, {
         <div class="post-body">
             <Content />
         </div>
+
+        <PostEngagement url={Astro.url.href} title={title} />
     </article>
 </Layout>
 

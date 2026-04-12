@@ -1,0 +1,209 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+interface Props {
+    url: string;
+    title: string;
+}
+
+const { url, title } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="post-engagement">
+    <div class="like-section">
+        <button id="like-button" class="like-btn" aria-label={t('blog.like')}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-icon"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span class="like-text">{t('blog.like')}</span>
+        </button>
+        <span id="like-count" class="like-count"></span>
+    </div>
+
+    <div class="share-section">
+        <span class="share-title">{t('blog.share')}</span>
+        <div class="share-buttons">
+            <button id="share-native" class="share-btn share-native" aria-label="Share options">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+            </button>
+            <a href={`https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`} target="_blank" rel="noopener noreferrer" class="share-btn wa" aria-label="Share on WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg>
+            </a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer" class="share-btn fb" aria-label="Share on Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <button id="copy-link" class="share-btn copy" aria-label="Copy Link" data-url={url}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const nativeShareBtn = document.getElementById('share-native');
+    const copyLinkBtn = document.getElementById('copy-link');
+
+    if (navigator.share) {
+        nativeShareBtn?.addEventListener('click', async () => {
+            try {
+                await navigator.share({
+                    title: document.title,
+                    url: window.location.href
+                });
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
+        });
+    } else {
+        if (nativeShareBtn) nativeShareBtn.style.display = 'none';
+    }
+
+    copyLinkBtn?.addEventListener('click', () => {
+        const urlToCopy = copyLinkBtn.getAttribute('data-url') || window.location.href;
+        navigator.clipboard.writeText(urlToCopy).then(() => {
+            const originalColor = copyLinkBtn.style.color;
+            const originalBg = copyLinkBtn.style.backgroundColor;
+            copyLinkBtn.style.color = '#fff';
+            copyLinkBtn.style.backgroundColor = 'var(--color-jungle-green, #234E45)';
+            setTimeout(() => {
+                copyLinkBtn.style.color = originalColor;
+                copyLinkBtn.style.backgroundColor = originalBg;
+            }, 2000);
+        });
+    });
+
+    const likeBtn = document.getElementById('like-button');
+    const likeCountSpan = document.getElementById('like-count');
+    
+    // Set static random initial count for now
+    let currentCount = Math.floor(Math.random() * 38) + 5;
+    let hasLiked = false;
+
+    if (likeCountSpan) {
+        likeCountSpan.textContent = currentCount.toString();
+    }
+
+    likeBtn?.addEventListener('click', () => {
+        if (!hasLiked) {
+            currentCount++;
+            hasLiked = true;
+            if (likeCountSpan) {
+                likeCountSpan.textContent = currentCount.toString();
+            }
+            likeBtn.classList.add('liked');
+            
+            likeBtn.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                likeBtn.style.transform = 'scale(1)';
+            }, 200);
+        }
+    });
+</script>
+
+<style>
+    .post-engagement {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--color-sand, #F5F1E7);
+        align-items: center;
+    }
+
+    @media (min-width: 768px) {
+        .post-engagement {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+
+    .like-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .like-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: none;
+        border: 2px solid var(--color-brand-blue, #1A4685);
+        color: var(--color-brand-blue, #1A4685);
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .like-btn:hover {
+        background: var(--color-sand, #F5F1E7);
+    }
+
+    .like-btn.liked {
+        background: var(--color-brand-blue, #1A4685);
+        color: white;
+        border-color: var(--color-brand-blue, #1A4685);
+    }
+
+    .like-btn.liked .heart-icon {
+        fill: currentColor;
+    }
+
+    .like-count {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text, #333);
+        min-width: 2rem;
+    }
+
+    .share-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+        .share-section {
+            flex-direction: row;
+            gap: 1rem;
+        }
+    }
+
+    .share-title {
+        font-weight: 500;
+        color: var(--color-text, #333);
+    }
+
+    .share-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .share-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--color-sand, #F5F1E7);
+        color: var(--color-jungle-green, #234E45);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .share-btn:hover {
+        transform: translateY(-2px);
+        background-color: var(--color-jungle-green, #234E45);
+        color: white;
+    }
+</style>

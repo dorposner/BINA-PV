@@ -75,6 +75,8 @@ export const ui = {
         'form.close': 'סגור',
         'home.blogTitle': 'מהבלוג שלנו',
         'home.viewAllBlog': 'לכל הכתבות בבלוג ←',
+        'blog.share': 'שתפו את הכתבה',
+        'blog.like': 'אהבתם?',
     },
     en: {
         'site.description': 'BINA Community House in Puerto Viejo, Costa Rica. Your Israeli-Jewish home in Central America for Shabbat dinners, holidays, community meetups, and travel recommendations.',
@@ -144,6 +146,8 @@ export const ui = {
         'form.close': 'Close',
         'home.blogTitle': 'Latest from our Blog',
         'home.viewAllBlog': 'View all blog posts ←',
+        'blog.share': 'Share this post',
+        'blog.like': 'Did you like it?',
     },
     es: {
         'site.description': 'BINA Casa Comunitaria en Puerto Viejo, Costa Rica. Tu hogar judío-israelí en América Central para cenas de Shabat, festividades, encuentros comunitarios y recomendaciones de viaje.',
@@ -213,5 +217,7 @@ export const ui = {
         'form.close': 'Cerrar',
         'home.blogTitle': 'Últimas entradas del Blog',
         'home.viewAllBlog': 'Ver todas las publicaciones ←',
+        'blog.share': 'Compartir este artículo',
+        'blog.like': '¿Te gustó?',
     },
 } as const;
