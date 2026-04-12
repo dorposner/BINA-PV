@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url) || 'he';
+const t = useTranslations(lang);
+const basePath = lang === 'he' ? '' : '/' + lang;
+---
+
+<Layout title="404" description="404 - Page Not Found">
+    <section class="not-found-section">
+        <div class="container not-found-container">
+            <h1 class="oversized-404">404</h1>
+            <h2>{t('404.title')}</h2>
+            <p class="subtitle">{t('404.subtitle')}</p>
+            
+            <div class="actions">
+                <a href="https://shithead.kesher.me/" class="button button-primary cta-button" target="_blank" rel="noopener noreferrer">
+                    {t('404.play')}
+                </a>
+                <a href={`${basePath}/`} class="home-link">
+                    {t('404.home')}
+                </a>
+            </div>
+        </div>
+    </section>
+</Layout>
+
+<style>
+    .not-found-section {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding-block: 4rem;
+        background-color: var(--color-sand-light);
+    }
+    
+    .not-found-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .oversized-404 {
+        font-size: 8rem;
+        font-weight: 700;
+        color: var(--color-brand-blue);
+        margin-block-end: 0;
+        line-height: 1;
+        margin-block-start: 0;
+    }
+
+    h2 {
+        font-size: 2rem;
+        color: var(--color-jungle-green, var(--color-text));
+        margin-block-start: 1rem;
+        margin-block-end: 1rem;
+    }
+
+    .subtitle {
+        font-size: 1.25rem;
+        color: var(--color-text);
+        margin-block-end: 3rem;
+        line-height: 1.6;
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .cta-button {
+        font-size: 1.25rem;
+        padding: 1rem 2.5rem;
+    }
+
+    .home-link {
+        font-size: 1.1rem;
+        color: var(--color-brand-blue);
+        text-decoration: underline;
+        font-weight: 500;
+    }
+    
+    .home-link:hover {
+        color: var(--color-brand-red);
+    }
+
+    @media (min-width: 768px) {
+        .oversized-404 {
+            font-size: 10rem;
+        }
+    }
+</style>

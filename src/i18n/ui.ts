@@ -77,6 +77,10 @@ export const ui = {
         'home.viewAllBlog': 'לכל הכתבות בבלוג ←',
         'blog.share': 'שתפו את הכתבה',
         'blog.like': 'אהבתם?',
+        '404.title': 'אופס, נראה שהלכתם קצת לאיבוד בג\'ונגל!',
+        '404.subtitle': 'העמוד שחיפשתם לא קיים. אבל היי, בזמן שאתם מחפשים את הדרך חזרה, בואו לשחק בגרסת האונליין של שיטהד - משחק הקלפים הרשמי של בית בינ"ה!',
+        '404.play': 'שחקו שיטהד אונליין 🃏',
+        '404.home': 'או חזרו לעמוד הבית ←',
     },
     en: {
         'site.description': 'BINA Community House in Puerto Viejo, Costa Rica. Your Israeli-Jewish home in Central America for Shabbat dinners, holidays, community meetups, and travel recommendations.',
@@ -148,6 +152,10 @@ export const ui = {
         'home.viewAllBlog': 'View all blog posts ←',
         'blog.share': 'Share this post',
         'blog.like': 'Did you like it?',
+        '404.title': 'Oops, looks like you got lost in the jungle!',
+        '404.subtitle': 'The page you are looking for does not exist. But hey, while you find your way back, come play the online version of Shithead - the official card game of the BINA house!',
+        '404.play': 'Play Shithead Online 🃏',
+        '404.home': 'Or go back to the homepage ←',
     },
     es: {
         'site.description': 'BINA Casa Comunitaria en Puerto Viejo, Costa Rica. Tu hogar judío-israelí en América Central para cenas de Shabat, festividades, encuentros comunitarios y recomendaciones de viaje.',
@@ -219,5 +227,9 @@ export const ui = {
         'home.viewAllBlog': 'Ver todas las publicaciones ←',
         'blog.share': 'Compartir este artículo',
         'blog.like': '¿Te gustó?',
+        '404.title': '¡Uy, parece que te perdiste en la selva!',
+        '404.subtitle': 'La página que buscas no existe. Pero oye, mientras encuentras el camino de regreso, ¡ven a jugar la versión en línea de Shithead, el juego de cartas oficial de la casa BINA!',
+        '404.play': 'Jugar Shithead en línea 🃏',
+        '404.home': 'O volver a la página principal ←',
     },
 } as const;
