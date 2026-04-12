@@ -23,7 +23,7 @@ collections:
       - {label: "Permalink (URL Path in English)", name: "permalink", widget: "string", hint: "הכנס מזהה באנגלית ללא רווחים, למשל: shabbat-dinner", i18n: duplicate}
       - {label: "תאריך (Date)", name: "date", widget: "datetime", i18n: duplicate}
       - {label: "שעה (Time)", name: "time", widget: "string", required: false, i18n: duplicate}
-      - {label: "תיאור (Description)", name: "description", widget: "text", required: false, i18n: true}
+      - {label: "תיאור (Description)", name: "description", widget: "markdown", required: false, i18n: true}
       - {label: "תמונה (Image)", name: "image", widget: "image", required: false, i18n: duplicate}
       - {label: "קישור הרשמה (Registration Link)", name: "registrationLink", widget: "string", required: false, i18n: duplicate}
       - {label: "ללא הרשמה (Hide Registration Button)", name: "hide_registration", widget: "boolean", default: false, required: false}

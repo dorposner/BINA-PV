@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { marked } from 'marked';
 
 interface Props {
   event: any;
@@ -10,6 +11,7 @@ interface Props {
 
 const { event, isPast = false } = Astro.props;
 const { title, date, time, description, image, registrationLink } = event.data;
+const parsedDescription = marked.parse(event.data.description || '');
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -48,7 +50,7 @@ const formattedDate = date ? formatter.format(date) : '';
             {time && <span> | {time}</span>}
         </p>
         
-        {description && <p class="event-description" set:html={description}></p>}
+        {description && <p class="event-description" set:html={parsedDescription}></p>}
         
         {!isPast && (
             <div class="event-actions">
