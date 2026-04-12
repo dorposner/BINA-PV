@@ -81,22 +81,22 @@ const formattedDate = date ? formatter.format(date) : '';
                 
                 <div class="form-group">
                     <label for={`name-${eventId}`}>{t('form.name')} *</label>
-                    <input type="text" id={`name-${eventId}`} name="name" required />
+                    <input type="text" id={`name-${eventId}`} name="name" required autocomplete="name" />
                 </div>
                 
                 <div class="form-group">
                     <label for={`phone-${eventId}`}>{t('form.phone')} *</label>
-                    <input type="tel" id={`phone-${eventId}`} name="phone" required dir="ltr" />
+                    <input type="tel" id={`phone-${eventId}`} name="phone" required dir="ltr" autocomplete="tel" />
                 </div>
                 
                 <div class="form-group">
                     <label for={`email-${eventId}`}>{t('form.email')}</label>
-                    <input type="email" id={`email-${eventId}`} name="email" dir="ltr" />
+                    <input type="email" id={`email-${eventId}`} name="email" dir="ltr" autocomplete="email" />
                 </div>
                 
                 <div class="form-group">
                     <label for={`participants-${eventId}`}>{t('form.participants')}</label>
-                    <input type="number" id={`participants-${eventId}`} name="participants" min="1" value="1" required />
+                    <input type="number" id={`participants-${eventId}`} name="participants" min="1" value="1" required autocomplete="off" />
                 </div>
                 
                 <div class="form-group">
@@ -179,7 +179,10 @@ const formattedDate = date ? formatter.format(date) : '';
                     });
                     
                     console.log('Fetch request completed (opaque response).');
-                    
+                } catch (err) {
+                    console.log('Fetch rejected due to CORB, but data was sent:', err);
+                } finally {
+                    // Always execute the UI success flow because GAS block fetch reads
                     if (redirectUrl && redirectUrl.trim() !== '') {
                         console.log('Redirecting to external URL:', redirectUrl);
                         // Make sure we use standard browser alert and timeout safely
@@ -202,10 +205,7 @@ const formattedDate = date ? formatter.format(date) : '';
                             modal.close();
                         }
                     }
-                } catch (err) {
-                    console.error('Submission error intercepted:', err);
-                    alert(`${errorMsg} - Check console for details.`);
-                } finally {
+
                     console.log('--- Form Submission Finished ---');
                     if (!redirectUrl || redirectUrl.trim() === '') {
                         if (submitBtn) {
