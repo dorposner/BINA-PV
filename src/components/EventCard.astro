@@ -172,14 +172,13 @@ const formattedDate = date ? formatter.format(date) : '';
                     console.log('Sending POST request to:', scriptUrl);
                     
                     // Sending the request using no-cors
-                    const response = await fetch(scriptUrl, {
+                    await fetch(scriptUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         body: formData
                     });
                     
-                    console.log('Fetch request completed.');
-                    console.log('Response type (opaque expected due to no-cors):', response.type);
+                    console.log('Fetch request completed (opaque response).');
                     
                     if (redirectUrl && redirectUrl.trim() !== '') {
                         console.log('Redirecting to external URL:', redirectUrl);
