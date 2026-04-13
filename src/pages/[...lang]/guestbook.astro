@@ -1,0 +1,342 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
+  ];
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<Layout title={t('gb.title')} description={t('gb.subtitle')}>
+    <section class="guestbook-hero">
+        <div class="container text-center">
+            <h1>{t('gb.title')}</h1>
+            <p class="subtitle">{t('gb.subtitle')}</p>
+        </div>
+    </section>
+
+    <section class="guestbook-section container">
+        <div class="guestbook-form-container">
+            <form id="gb-form" class="gb-form" data-success={t('gb.form.success')} data-error={t('gb.form.error')}>
+                <div class="form-group">
+                    <label for="gb-name">{t('gb.form.name')} *</label>
+                    <input type="text" id="gb-name" name="name" required autocomplete="nickname" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="gb-message">{t('gb.form.message')} *</label>
+                    <textarea id="gb-message" name="message" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gb-image">{t('gb.form.image')}</label>
+                    <input type="url" id="gb-image" name="imageUrl" dir="ltr" placeholder="https://..." />
+                </div>
+                
+                <button type="submit" class="button button-primary submit-gb-btn" id="submit-gb-btn">{t('gb.form.submit')}</button>
+            </form>
+        </div>
+        
+        <div id="gb-loading" class="text-center" style="margin: 3rem 0; font-size: 1.2rem; color: #666;">{t('gb.loading')}</div>
+        <div id="gb-empty" class="text-center" style="display: none; margin: 3rem 0; font-size: 1.2rem; color: #666;">{t('gb.empty')}</div>
+        
+        <div id="guestbook-grid" class="polaroid-grid">
+            <!-- Cards will be injected here -->
+        </div>
+    </section>
+</Layout>
+
+<script>
+    import { marked } from 'marked';
+    
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const grid = document.getElementById('guestbook-grid');
+        const loading = document.getElementById('gb-loading');
+        const emptyMsg = document.getElementById('gb-empty');
+        const form = document.getElementById('gb-form') as HTMLFormElement;
+        const submitBtn = document.getElementById('submit-gb-btn') as HTMLButtonElement;
+        
+        async function fetchGuestbook() {
+            try {
+                const res = await fetch(`${scriptUrl}?action=getGuestbook`);
+                const data = await res.json();
+                
+                if (loading) loading.style.display = 'none';
+                
+                if (!data || data.length === 0) {
+                    if (emptyMsg) emptyMsg.style.display = 'block';
+                    return;
+                }
+                
+                if (emptyMsg) emptyMsg.style.display = 'none';
+                if (grid) grid.innerHTML = '';
+                
+                // Sort by Timestamp descending (newest first)
+                data.sort((a: any, b: any) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime());
+                
+                data.forEach((entry: any, index: number) => {
+                    if (!entry.Name && !entry.Message) return; 
+                    
+                    const card = document.createElement('div');
+                    card.className = 'polaroid-card';
+                    const rotation = (index % 5 - 2) * 2; 
+                    card.style.transform = `rotate(${rotation}deg)`;
+                    
+                    let imgHtml = '';
+                    if (entry.ImageUrl && entry.ImageUrl.trim() !== '') {
+                        // Very simple security check to avoid trivial breakages
+                        const safeUrl = entry.ImageUrl.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        imgHtml = `<div class="polaroid-img-wrapper"><img src="${safeUrl}" alt="Guest photo" loading="lazy" /></div>`;
+                    }
+                    
+                    const parsedMsg = entry.Message ? marked.parse(entry.Message) : '';
+                    
+                    let dateStr = '';
+                    if (entry.Timestamp) {
+                        try {
+                            const d = new Date(entry.Timestamp);
+                            dateStr = d.toLocaleDateString();
+                        } catch(e){}
+                    }
+
+                    card.innerHTML = `
+                        ${imgHtml}
+                        <div class="polaroid-content">
+                            <div class="polaroid-text">${parsedMsg}</div>
+                            <div class="polaroid-footer">
+                                <span class="polaroid-name">${(entry.Name || 'Anonymous').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                                ${dateStr ? `<span class="polaroid-date">${dateStr}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (grid) grid.appendChild(card);
+                });
+                
+            } catch(e) {
+                console.error("Error fetching guestbook:", e);
+                if (loading) loading.textContent = 'Failed to load entries.';
+            }
+        }
+        
+        fetchGuestbook();
+        
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const originalText = submitBtn.textContent;
+                if (submitBtn) {
+                    submitBtn.textContent = '...';
+                    submitBtn.disabled = true;
+                }
+                
+                const successMsg = form.getAttribute('data-success') || 'Success';
+                const errorMsg = form.getAttribute('data-error') || 'Error';
+                
+                const formData = new FormData(form);
+                formData.append('action', 'submitGuestbook');
+                
+                try {
+                    await fetch(scriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: formData
+                    });
+                    
+                    // Delay slightly to give GAS time to save
+                    setTimeout(async () => {
+                        alert(successMsg);
+                        form.reset();
+                        
+                        if (loading) {
+                            loading.style.display = 'block';
+                            loading.textContent = '...';
+                        }
+                        if (grid) grid.innerHTML = '';
+                        await fetchGuestbook();
+                        
+                        if (submitBtn) {
+                            submitBtn.textContent = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }, 500);
+                    
+                } catch(err) {
+                    console.error("Form submit error:", err);
+                    alert(errorMsg);
+                    if (submitBtn) {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .guestbook-hero {
+        background-color: var(--color-brand-blue);
+        color: var(--color-white);
+        padding-block: 4rem;
+        margin-block-start: -1px;
+    }
+    
+    .guestbook-hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .guestbook-hero .subtitle {
+        font-size: 1.25rem;
+        opacity: 0.9;
+    }
+    
+    .guestbook-section {
+        padding-block: 3rem;
+    }
+    
+    .guestbook-form-container {
+        max-width: 600px;
+        margin: 0 auto 4rem auto;
+        background: var(--color-white);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid var(--color-sand);
+    }
+    
+    .form-group {
+        margin-block-end: 1.25rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-block-end: 0.5rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: var(--color-text);
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--color-brand-blue);
+        box-shadow: 0 0 0 2px rgba(9, 64, 103, 0.1);
+    }
+    
+    .submit-gb-btn {
+        width: 100%;
+        margin-block-start: 1rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .polaroid-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 3rem 2rem;
+        padding-inline: 1rem;
+    }
+    
+    .polaroid-card {
+        background: #fff;
+        padding: 15px 15px 25px 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border: 1px solid #eee;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .polaroid-card:hover {
+        z-index: 10;
+        transform: scale(1.05) rotate(0deg) !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+    
+    .polaroid-img-wrapper {
+        width: 100%;
+        background: #f0f0f0;
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+    
+    .polaroid-img-wrapper img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .polaroid-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .polaroid-text {
+        color: var(--color-text);
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Using global selector for marked content parsed inside the component */
+    :global(.polaroid-text p) {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+    }
+    
+    :global(.polaroid-text p:last-child) {
+        margin-bottom: 0;
+    }
+    
+    .polaroid-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-top: 1px dashed #eee;
+        padding-top: 10px;
+        font-family: 'Caveat', cursive;
+    }
+    
+    .polaroid-name {
+        font-size: 1.8rem;
+        color: var(--color-brand-blue);
+        line-height: 1;
+        font-weight: 700;
+        word-break: break-word;
+    }
+    
+    .polaroid-date {
+        font-size: 1.2rem;
+        color: #777;
+        line-height: 1;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+</style>
