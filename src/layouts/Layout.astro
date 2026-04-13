@@ -64,13 +64,11 @@ const basePath = lang === 'he' ? '' : '/' + lang;
                 </button>
                 <nav id="main-nav" class="main-nav">
                     <ul>
-                        <li><a href={`${basePath}/`}>{t('nav.home')}</a></li>
-                        <li><a href={`${basePath}/#about`}>{t('nav.about')}</a></li>
                         <li><a href={`${basePath}/#schedule`}>{t('nav.schedule')}</a></li>
-                        <li><a href={`${basePath}/events/archive`}>{t('nav.archive')}</a></li>
-                        <li><a href={`${basePath}/guestbook`}>{t('nav.guestbook')}</a></li>
                         <li><a href={`${basePath}/recommendations`}>{t('nav.recommendations')}</a></li>
                         <li><a href={`${basePath}/blog`}>{t('nav.blog')}</a></li>
+                        <li><a href={`${basePath}/events/archive`}>{t('nav.archive')}</a></li>
+                        <li><a href={`${basePath}/guestbook`}>{t('nav.guestbook')}</a></li>
                         {
                             [
                                 { code: 'he', label: 'HE', basePath: '/' },
@@ -233,7 +231,7 @@ const basePath = lang === 'he' ? '' : '/' + lang;
 
         .main-nav ul {
             flex-direction: row;
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
         .main-nav a:hover {
