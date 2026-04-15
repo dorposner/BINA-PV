@@ -207,12 +207,7 @@ const formattedDate = date ? formatter.format(date) : "";
                             placeholder={t("potluck.customInput")}
                             style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;"
                         />
-                        <button
-                            type="button"
-                            class="button potluck-custom-add-btn"
-                            style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;"
-                            >{t("potluck.add")}</button
-                        >
+                        <button type="button" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">{t('potluck.add') || 'הוסף'}</button>
                     </div>
                 </div>
 
@@ -321,8 +316,17 @@ const formattedDate = date ? formatter.format(date) : "";
                     );
             }
 
+            if (customInput && addBtn) {
+                customInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addBtn.click();
+                    }
+                });
+            }
+
             if (addBtn && customInput && potluckList) {
-                addBtn.addEventListener("click", () => {
+                addBtn.addEventListener('click', () => {
                     const val = customInput.value.trim();
                     if (val) {
                         potluckContainer.style.display = "block";
