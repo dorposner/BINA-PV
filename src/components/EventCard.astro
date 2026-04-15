@@ -75,7 +75,7 @@ const formattedDate = date ? formatter.format(date) : '';
                 <p><strong>{title}</strong></p>
                 <p>{formattedDate}{time ? ` | ${time}` : ''}</p>
             </div>
-            <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')} data-redirecting={t('form.redirecting')} data-redirect-url={registrationLink && registrationLink !== '' ? registrationLink : ''}>
+            <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')} data-redirecting={t('form.redirecting')} data-redirect-url={registrationLink && registrationLink !== '' ? registrationLink : ''} data-event-name={hebrewTitle}>
                 <input type="hidden" name="eventName" value={hebrewTitle} />
                 <input type="hidden" name="eventDate" value={`${hebrewFormattedDate}${time ? ` | ${time}` : ''}`} />
                 
@@ -102,6 +102,17 @@ const formattedDate = date ? formatter.format(date) : '';
                 <div class="form-group">
                     <label for={`notes-${eventId}`}>{t('form.notes')}</label>
                     <textarea id={`notes-${eventId}`} name="notes" rows="3"></textarea>
+                </div>
+                
+                <div class="potluck-container" style="display: none; margin-block-end: 1.5rem;">
+                    <label style="display: block; margin-block-end: 0.5rem; font-weight: 500; font-size: 0.9rem;">מה תרצו להביא איתכם? (רשות)</label>
+                    <div class="potluck-items-list" style="margin-block-end: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Potluck items will be injected here -->
+                    </div>
+                    <div class="potluck-add-custom" style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="potluck-custom-input" placeholder="Add custom item..." style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;" />
+                        <button type="button" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">Add</button>
+                    </div>
                 </div>
                 
                 <button type="submit" class="button button-primary submit-register-btn">{t('form.submit')}</button>
@@ -138,6 +149,79 @@ const formattedDate = date ? formatter.format(date) : '';
 
         const registrationForms = document.querySelectorAll('.registration-form');
         registrationForms.forEach(form => {
+            const potluckContainer = form.querySelector('.potluck-container') as HTMLElement;
+            const potluckList = form.querySelector('.potluck-items-list') as HTMLElement;
+            const customInput = form.querySelector('.potluck-custom-input') as HTMLInputElement;
+            const addBtn = form.querySelector('.potluck-custom-add-btn') as HTMLButtonElement;
+            const eventName = form.getAttribute('data-event-name') || '';
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
+
+            if (potluckContainer && eventName) {
+                fetch(`${scriptUrl}?action=getPotluck&eventName=${encodeURIComponent(eventName)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (Array.isArray(data) && data.length > 0) {
+                            potluckContainer.style.display = 'block';
+                            data.forEach((itemInfo: any) => {
+                                const label = document.createElement('label');
+                                label.style.display = 'flex';
+                                label.style.alignItems = 'center';
+                                label.style.gap = '0.5rem';
+                                label.style.cursor = itemInfo.status === 'taken' ? 'not-allowed' : 'pointer';
+                                
+                                const cb = document.createElement('input');
+                                cb.type = 'checkbox';
+                                cb.value = itemInfo.item;
+                                cb.className = 'potluck-checkbox';
+                                
+                                const span = document.createElement('span');
+                                span.textContent = itemInfo.item;
+                                
+                                if (itemInfo.status === 'taken') {
+                                    cb.disabled = true;
+                                    cb.checked = true;
+                                    span.style.textDecoration = 'line-through';
+                                    span.style.color = '#999';
+                                }
+                                
+                                label.appendChild(cb);
+                                label.appendChild(span);
+                                potluckList.appendChild(label);
+                            });
+                        }
+                    })
+                    .catch(e => console.error('Error fetching potluck items:', e));
+            }
+
+            if (addBtn && customInput && potluckList) {
+                addBtn.addEventListener('click', () => {
+                    const val = customInput.value.trim();
+                    if (val) {
+                        potluckContainer.style.display = 'block';
+                        const label = document.createElement('label');
+                        label.style.display = 'flex';
+                        label.style.alignItems = 'center';
+                        label.style.gap = '0.5rem';
+                        label.style.cursor = 'pointer';
+                        
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = val;
+                        cb.checked = true;
+                        cb.className = 'potluck-checkbox';
+                        
+                        const span = document.createElement('span');
+                        span.textContent = val;
+                        
+                        label.appendChild(cb);
+                        label.appendChild(span);
+                        potluckList.appendChild(label);
+                        
+                        customInput.value = '';
+                    }
+                });
+            }
+
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 console.log('Submit event triggered for form:', form);
@@ -161,14 +245,20 @@ const formattedDate = date ? formatter.format(date) : '';
                 try {
                     console.log('--- Form Submission Started ---');
                     
-                    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
                     console.log('Sending POST request to:', scriptUrl);
+                    
+                    const formData = new FormData(formEl);
+                    const potluckCheckboxes = formEl.querySelectorAll('.potluck-checkbox:checked:not(:disabled)');
+                    if (potluckCheckboxes.length > 0) {
+                        const items = Array.from(potluckCheckboxes).map(cb => (cb as HTMLInputElement).value).join(', ');
+                        formData.append('potluckItems', items);
+                    }
                     
                     // Sending the request using no-cors with raw FormData
                     await fetch(scriptUrl, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: new FormData(formEl)
+                        body: formData
                     });
                     
                     console.log('Fetch request completed (opaque response).');
