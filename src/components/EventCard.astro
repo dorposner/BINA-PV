@@ -1,121 +1,226 @@
 ---
-import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
-import { getLangFromUrl, useTranslations } from '../i18n/utils';
-import { marked } from 'marked';
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { marked } from "marked";
 
 interface Props {
-  event: any;
-  isPast?: boolean;
+    event: any;
+    isPast?: boolean;
 }
 
 const { event, isPast = false } = Astro.props;
 const { title, date, time, description, image, registrationLink } = event.data;
-const parsedDescription = marked.parse(event.data.description || '');
+const parsedDescription = marked.parse(event.data.description || "");
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const allEvents = await getCollection('events');
-const hebrewEvent = allEvents.find((e: any) => e.id.startsWith('he/') && (e.data.permalink === event.data.permalink || e.id.split('/').pop() === event.id.split('/').pop()));
+const allEvents = await getCollection("events");
+const hebrewEvent = allEvents.find(
+    (e: any) =>
+        e.id.startsWith("he/") &&
+        (e.data.permalink === event.data.permalink ||
+            e.id.split("/").pop() === event.id.split("/").pop()),
+);
 const hebrewTitle = hebrewEvent ? hebrewEvent.data.title : event.data.title;
 
-const hebrewFormatter = new Intl.DateTimeFormat('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-const hebrewFormattedDate = date ? hebrewFormatter.format(date) : '';
+const hebrewFormatter = new Intl.DateTimeFormat("he-IL", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+});
+const hebrewFormattedDate = date ? hebrewFormatter.format(date) : "";
 
 // Generate unique ID for the inputs
 const eventId = Math.random().toString(36).substring(2, 9);
 
 // Formatting the date
-const locale = lang === 'he' ? 'he-IL' : lang === 'es' ? 'es-CR' : 'en-US';
+const locale = lang === "he" ? "he-IL" : lang === "es" ? "es-CR" : "en-US";
 const formatter = new Intl.DateTimeFormat(locale, {
-  weekday: 'long', 
-  year: 'numeric', 
-  month: 'long', 
-  day: 'numeric' 
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
 });
-const formattedDate = date ? formatter.format(date) : '';
+const formattedDate = date ? formatter.format(date) : "";
 ---
 
 <article class="event-card">
-    {image && (
-        <div class="event-image-wrapper">
-             <Image src={image} alt={title} width={600} height={400} class="event-image" />
-        </div>
-    )}
+    {
+        image && (
+            <div class="event-image-wrapper">
+                <Image
+                    src={image}
+                    alt={title}
+                    width={600}
+                    height={400}
+                    class="event-image"
+                />
+            </div>
+        )
+    }
     <div class="event-content">
         <h3>{title}</h3>
         <p class="event-date">
             <time datetime={date.toISOString()}>{formattedDate}</time>
             {time && <span> | {time}</span>}
         </p>
-        
-        {description && <p class="event-description" set:html={parsedDescription}></p>}
-        
-        {!isPast && (
-            <div class="event-actions">
-                {!event.data.hide_registration && (
-                    <a href="#register" class="button button-primary register-btn open-modal-trigger">
-                        {t('event.register')}
-                    </a>
-                )}
-                
-                <button class="button share-button" aria-label={t('event.share')} data-title={title} data-text={description || ''} data-url={Astro.url.href} data-msg-copied={t('event.copied')}>
-                    {t('event.share')}
-                </button>
-            </div>
-        )}
+
+        {
+            description && (
+                <p class="event-description" set:html={parsedDescription} />
+            )
+        }
+
+        {
+            !isPast && (
+                <div class="event-actions">
+                    {!event.data.hide_registration && (
+                        <a
+                            href="#register"
+                            class="button button-primary register-btn open-modal-trigger"
+                        >
+                            {t("event.register")}
+                        </a>
+                    )}
+
+                    <button
+                        class="button share-button"
+                        aria-label={t("event.share")}
+                        data-title={title}
+                        data-text={description || ""}
+                        data-url={Astro.url.href}
+                        data-msg-copied={t("event.copied")}
+                    >
+                        {t("event.share")}
+                    </button>
+                </div>
+            )
+        }
     </div>
-    
+
     <dialog class="registration-modal">
         <div class="modal-content">
-            <button class="close-modal" aria-label={t('form.close')}>&times;</button>
+            <button class="close-modal" aria-label={t("form.close")}
+                >&times;</button
+            >
             <div class="modal-header">
-                <h4>{t('form.title')}</h4>
+                <h4>{t("form.title")}</h4>
                 <p><strong>{title}</strong></p>
-                <p>{formattedDate}{time ? ` | ${time}` : ''}</p>
+                <p>{formattedDate}{time ? ` | ${time}` : ""}</p>
             </div>
-            <form class="registration-form" data-success={t('form.success')} data-error={t('form.error')} data-redirecting={t('form.redirecting')} data-redirect-url={registrationLink && registrationLink !== '' ? registrationLink : ''} data-event-name={hebrewTitle}>
+            <form
+                class="registration-form"
+                data-success={t("form.success")}
+                data-error={t("form.error")}
+                data-redirecting={t("form.redirecting")}
+                data-redirect-url={registrationLink && registrationLink !== ""
+                    ? registrationLink
+                    : ""}
+                data-event-name={hebrewTitle}
+            >
                 <input type="hidden" name="eventName" value={hebrewTitle} />
-                <input type="hidden" name="eventDate" value={`${hebrewFormattedDate}${time ? ` | ${time}` : ''}`} />
-                
+                <input
+                    type="hidden"
+                    name="eventDate"
+                    value={`${hebrewFormattedDate}${time ? ` | ${time}` : ""}`}
+                />
+
                 <div class="form-group">
-                    <label for={`name-${eventId}`}>{t('form.name')} *</label>
-                    <input type="text" id={`name-${eventId}`} name="name" required autocomplete="name" />
+                    <label for={`name-${eventId}`}>{t("form.name")} *</label>
+                    <input
+                        type="text"
+                        id={`name-${eventId}`}
+                        name="name"
+                        required
+                        autocomplete="name"
+                    />
                 </div>
-                
+
                 <div class="form-group">
-                    <label for={`phone-${eventId}`}>{t('form.phone')} *</label>
-                    <input type="tel" id={`phone-${eventId}`} name="phone" required dir="ltr" autocomplete="tel" />
+                    <label for={`phone-${eventId}`}>{t("form.phone")} *</label>
+                    <input
+                        type="tel"
+                        id={`phone-${eventId}`}
+                        name="phone"
+                        required
+                        dir="ltr"
+                        autocomplete="tel"
+                    />
                 </div>
-                
+
                 <div class="form-group">
-                    <label for={`email-${eventId}`}>{t('form.email')}</label>
-                    <input type="email" id={`email-${eventId}`} name="email" dir="ltr" autocomplete="email" />
+                    <label for={`email-${eventId}`}>{t("form.email")}</label>
+                    <input
+                        type="email"
+                        id={`email-${eventId}`}
+                        name="email"
+                        dir="ltr"
+                        autocomplete="email"
+                    />
                 </div>
-                
+
                 <div class="form-group">
-                    <label for={`participants-${eventId}`}>{t('form.participants')}</label>
-                    <input type="number" id={`participants-${eventId}`} name="participants" min="1" value="1" required autocomplete="off" />
+                    <label for={`participants-${eventId}`}
+                        >{t("form.participants")}</label
+                    >
+                    <input
+                        type="number"
+                        id={`participants-${eventId}`}
+                        name="participants"
+                        min="1"
+                        value="1"
+                        required
+                        autocomplete="off"
+                    />
                 </div>
-                
+
                 <div class="form-group">
-                    <label for={`notes-${eventId}`}>{t('form.notes')}</label>
-                    <textarea id={`notes-${eventId}`} name="notes" rows="3"></textarea>
+                    <label for={`notes-${eventId}`}>{t("form.notes")}</label>
+                    <textarea id={`notes-${eventId}`} name="notes" rows="3"
+                    ></textarea>
                 </div>
-                
-                <div class="potluck-container" style="display: none; margin-block-end: 1.5rem;">
-                    <label style="display: block; margin-block-end: 0.5rem; font-weight: 500; font-size: 0.9rem;">{t('potluck.title')}</label>
-                    <div class="potluck-items-list" style="margin-block-end: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+
+                <div
+                    class="potluck-container"
+                    style="display: none; margin-block-end: 1.5rem;"
+                >
+                    <label
+                        style="display: block; margin-block-end: 0.5rem; font-weight: 500; font-size: 0.9rem;"
+                        >{t("potluck.title")}</label
+                    >
+                    <div
+                        class="potluck-items-list"
+                        style="margin-block-end: 1rem; display: flex; flex-direction: column; gap: 0.5rem;"
+                    >
                         <!-- Potluck items will be injected here -->
                     </div>
-                    <div class="potluck-add-custom" style="display: flex; gap: 0.5rem;">
-                        <input type="text" class="potluck-custom-input" placeholder={t('potluck.customInput')} style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;" />
-                        <button type="button" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">{t('potluck.add')}</button>
+                    <div
+                        class="potluck-add-custom"
+                        style="display: flex; gap: 0.5rem;"
+                    >
+                        <input
+                            type="text"
+                            class="potluck-custom-input"
+                            placeholder={t("potluck.customInput")}
+                            style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;"
+                        />
+                        <button
+                            type="button"
+                            class="button potluck-custom-add-btn"
+                            style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;"
+                            >{t("potluck.add")}</button
+                        >
                     </div>
                 </div>
-                
-                <button type="submit" class="button button-primary submit-register-btn">{t('form.submit')}</button>
+
+                <button
+                    type="submit"
+                    class="button button-primary submit-register-btn"
+                    >{t("form.submit")}</button
+                >
             </form>
         </div>
     </dialog>
@@ -123,186 +228,218 @@ const formattedDate = date ? formatter.format(date) : '';
 
 <script>
     // Component scripts run once per page in Astro
-    document.addEventListener('DOMContentLoaded', () => {
-        const registerButtons = document.querySelectorAll('.open-modal-trigger');
-        
-        registerButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
+    document.addEventListener("DOMContentLoaded", () => {
+        const registerButtons = document.querySelectorAll(
+            ".open-modal-trigger",
+        );
+
+        registerButtons.forEach((button) => {
+            button.addEventListener("click", (e) => {
                 e.preventDefault();
-                const article = button.closest('.event-card');
-                const modal = article?.querySelector('.registration-modal') as HTMLDialogElement;
-                if (modal && typeof modal.showModal === 'function') {
+                const article = button.closest(".event-card");
+                const modal = article?.querySelector(
+                    ".registration-modal",
+                ) as HTMLDialogElement;
+                if (modal && typeof modal.showModal === "function") {
                     modal.showModal();
                 }
             });
         });
 
-        const closeButtons = document.querySelectorAll('.close-modal');
-        closeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const modal = button.closest('.registration-modal') as HTMLDialogElement;
-                if (modal && typeof modal.close === 'function') {
+        const closeButtons = document.querySelectorAll(".close-modal");
+        closeButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const modal = button.closest(
+                    ".registration-modal",
+                ) as HTMLDialogElement;
+                if (modal && typeof modal.close === "function") {
                     modal.close();
                 }
             });
         });
 
-        const registrationForms = document.querySelectorAll('.registration-form');
-        registrationForms.forEach(form => {
-            const potluckContainer = form.querySelector('.potluck-container') as HTMLElement;
-            const potluckList = form.querySelector('.potluck-items-list') as HTMLElement;
-            const customInput = form.querySelector('.potluck-custom-input') as HTMLInputElement;
-            const addBtn = form.querySelector('.potluck-custom-add-btn') as HTMLButtonElement;
-            const eventName = form.getAttribute('data-event-name') || '';
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec';
+        const registrationForms =
+            document.querySelectorAll(".registration-form");
+        registrationForms.forEach((form) => {
+            const potluckContainer = form.querySelector(
+                ".potluck-container",
+            ) as HTMLElement;
+            const potluckList = form.querySelector(
+                ".potluck-items-list",
+            ) as HTMLElement;
+            const customInput = form.querySelector(
+                ".potluck-custom-input",
+            ) as HTMLInputElement;
+            const addBtn = form.querySelector(
+                ".potluck-custom-add-btn",
+            ) as HTMLButtonElement;
+            const eventName = form.getAttribute("data-event-name") || "";
+            const scriptUrl =
+                "https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec";
 
             if (potluckContainer && eventName) {
-                fetch(`${scriptUrl}?action=getPotluck&eventName=${encodeURIComponent(eventName)}`)
-                    .then(res => res.json())
-                    .then(data => {
+                fetch(
+                    `${scriptUrl}?action=getPotluck&eventName=${encodeURIComponent(eventName)}`,
+                )
+                    .then((res) => res.json())
+                    .then((data) => {
                         if (Array.isArray(data) && data.length > 0) {
-                            potluckContainer.style.display = 'block';
+                            potluckContainer.style.display = "block";
                             data.forEach((itemInfo: any) => {
-                                const label = document.createElement('label');
-                                label.style.display = 'flex';
-                                label.style.alignItems = 'center';
-                                label.style.gap = '0.5rem';
-                                label.style.cursor = itemInfo.status === 'taken' ? 'not-allowed' : 'pointer';
-                                
-                                const cb = document.createElement('input');
-                                cb.type = 'checkbox';
+                                const label = document.createElement("label");
+                                label.style.display = "flex";
+                                label.style.alignItems = "center";
+                                label.style.gap = "0.5rem";
+                                label.style.cursor =
+                                    itemInfo.status === "taken"
+                                        ? "not-allowed"
+                                        : "pointer";
+
+                                const cb = document.createElement("input");
+                                cb.type = "checkbox";
                                 cb.value = itemInfo.item;
-                                cb.className = 'potluck-checkbox';
-                                
-                                const span = document.createElement('span');
+                                cb.className = "potluck-checkbox";
+
+                                const span = document.createElement("span");
                                 span.textContent = itemInfo.item;
-                                
-                                if (itemInfo.status === 'taken') {
+
+                                if (itemInfo.status === "taken") {
                                     cb.disabled = true;
                                     cb.checked = true;
-                                    span.style.textDecoration = 'line-through';
-                                    span.style.color = '#999';
+                                    span.style.textDecoration = "line-through";
+                                    span.style.color = "#999";
                                 }
-                                
+
                                 label.appendChild(cb);
                                 label.appendChild(span);
                                 potluckList.appendChild(label);
                             });
                         }
                     })
-                    .catch(e => console.error('Error fetching potluck items:', e));
+                    .catch((e) =>
+                        console.error("Error fetching potluck items:", e),
+                    );
             }
 
             if (addBtn && customInput && potluckList) {
-                addBtn.addEventListener('click', () => {
+                addBtn.addEventListener("click", () => {
                     const val = customInput.value.trim();
                     if (val) {
-                        potluckContainer.style.display = 'block';
-                        const label = document.createElement('label');
-                        label.style.display = 'flex';
-                        label.style.alignItems = 'center';
-                        label.style.gap = '0.5rem';
-                        label.style.cursor = 'pointer';
-                        
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
+                        potluckContainer.style.display = "block";
+                        const label = document.createElement("label");
+                        label.style.display = "flex";
+                        label.style.alignItems = "center";
+                        label.style.gap = "0.5rem";
+                        label.style.cursor = "pointer";
+
+                        const cb = document.createElement("input");
+                        cb.type = "checkbox";
                         cb.value = val;
-                        cb.setAttribute('value', val);
-                        cb.className = 'potluck-checkbox';
-                        // Use both property and attribute to ensure CSS :checked and DOM queries pick it up reliably
+                        cb.className = "potluck-checkbox";
                         cb.checked = true;
-                        cb.defaultChecked = true;
-                        cb.setAttribute('checked', 'checked');
-                        
-                        const span = document.createElement('span');
+
+                        // --- התיקון החזותי: כופים על התיבה לקבל גודל ולהיות גלויה ---
+                        cb.style.width = "1.2rem";
+                        cb.style.height = "1.2rem";
+                        cb.style.minWidth = "1.2rem";
+                        cb.style.display = "inline-block";
+                        cb.style.flexShrink = "0";
+                        cb.style.margin = "0";
+
+                        const span = document.createElement("span");
                         span.textContent = val;
-                        
+
                         label.appendChild(cb);
                         label.appendChild(span);
                         potluckList.appendChild(label);
-                        
-                        customInput.value = '';
+
+                        customInput.value = "";
                     }
                 });
             }
 
-            form.addEventListener('submit', async (e) => {
+            form.addEventListener("submit", async (e) => {
                 e.preventDefault();
-                console.log('Submit event triggered for form:', form);
-                
+                console.log("Submit event triggered for form:", form);
+
                 const formEl = e.target as HTMLFormElement;
-                const submitBtn = formEl.querySelector('.submit-register-btn') as HTMLButtonElement;
-                const originalBtnText = submitBtn?.textContent || '';
-                
-                const successMsg = formEl.getAttribute('data-success') || 'Success';
-                const errorMsg = formEl.getAttribute('data-error') || 'Error';
-                const redirectingMsg = formEl.getAttribute('data-redirecting') || 'Redirecting...';
-                const redirectUrl = formEl.getAttribute('data-redirect-url');
-                
-                console.log('Form Context:', { successMsg, errorMsg, redirectingMsg, redirectUrl });
-                
+                const submitBtn = formEl.querySelector(
+                    ".submit-register-btn",
+                ) as HTMLButtonElement;
+                const originalBtnText = submitBtn?.textContent || "";
+
+                const successMsg =
+                    formEl.getAttribute("data-success") || "Success";
+                const errorMsg = formEl.getAttribute("data-error") || "Error";
+                const redirectingMsg =
+                    formEl.getAttribute("data-redirecting") || "Redirecting...";
+                const redirectUrl = formEl.getAttribute("data-redirect-url");
+
                 if (submitBtn) {
-                    submitBtn.textContent = '...';
+                    submitBtn.textContent = "...";
                     submitBtn.disabled = true;
                 }
-                
+
                 try {
-                    console.log('--- Form Submission Started ---');
-                    
-                    console.log('Sending POST request to:', scriptUrl);
-                    
+                    console.log("--- Form Submission Started ---");
                     const formData = new FormData(formEl);
-                    
-                    // Explicitly ensure 'name' field is gathered in case form structure behaves unexpectedly
-                    if (!formData.has('name') || !formData.get('name')) {
-                        const nameInput = formEl.querySelector('input[name="name"]') as HTMLInputElement;
-                        if (nameInput) formData.set('name', nameInput.value);
+
+                    if (!formData.has("name") || !formData.get("name")) {
+                        const nameInput = formEl.querySelector(
+                            'input[name="name"]',
+                        ) as HTMLInputElement;
+                        if (nameInput) formData.set("name", nameInput.value);
                     }
 
-                    // Look directly inside potluckList to be absolutely sure we capture dynamically added elements
-                    const potluckCheckboxes = potluckList.querySelectorAll('.potluck-checkbox:checked:not(:disabled)');
+                    // --- התיקון הלוגי: איסוף כל תיבות הסימון בצורה ברוטלית ---
+                    const potluckCheckboxes = potluckList.querySelectorAll(
+                        'input[type="checkbox"]:checked:not(:disabled)',
+                    );
                     if (potluckCheckboxes.length > 0) {
-                        const items = Array.from(potluckCheckboxes).map(cb => (cb as HTMLInputElement).value).join(', ');
-                        formData.append('potluckItems', items);
+                        const items = Array.from(potluckCheckboxes)
+                            .map((cb) => (cb as HTMLInputElement).value.trim())
+                            .filter((val) => val !== "" && val !== "on");
+
+                        if (items.length > 0) {
+                            formData.set("potluckItems", items.join(","));
+                        }
                     }
-                    
-                    // Sending the request using no-cors with raw FormData
+
                     await fetch(scriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: formData
+                        method: "POST",
+                        mode: "no-cors",
+                        body: formData,
                     });
-                    
-                    console.log('Fetch request completed (opaque response).');
+
+                    console.log("Fetch request completed (opaque response).");
                 } catch (err) {
-                    console.log('Fetch rejected due to CORB, but data was sent:', err);
+                    console.log(
+                        "Fetch rejected due to CORB, but data was sent:",
+                        err,
+                    );
                 } finally {
-                    // Always execute the UI success flow because GAS block fetch reads
-                    if (redirectUrl && redirectUrl.trim() !== '') {
-                        console.log('Redirecting to external URL:', redirectUrl);
-                        // Make sure we use standard browser alert and timeout safely
+                    if (redirectUrl && redirectUrl.trim() !== "") {
                         requestAnimationFrame(() => {
                             alert(redirectingMsg);
                             setTimeout(() => {
                                 window.location.href = redirectUrl;
-                            }, 1500); // reduced timeout slightly for better UX
+                            }, 1500);
                         });
                     } else {
-                        console.log('No redirect URL provided. Showing success alert.');
                         requestAnimationFrame(() => {
                             alert(successMsg);
                         });
-                        
                         formEl.reset();
-                        
-                        const modal = formEl.closest('.registration-modal') as HTMLDialogElement;
-                        if (modal && typeof modal.close === 'function') {
+                        const modal = formEl.closest(
+                            ".registration-modal",
+                        ) as HTMLDialogElement;
+                        if (modal && typeof modal.close === "function") {
                             modal.close();
                         }
                     }
 
-                    console.log('--- Form Submission Finished ---');
-                    if (!redirectUrl || redirectUrl.trim() === '') {
+                    console.log("--- Form Submission Finished ---");
+                    if (!redirectUrl || redirectUrl.trim() === "") {
                         if (submitBtn) {
                             submitBtn.textContent = originalBtnText;
                             submitBtn.disabled = false;
@@ -312,31 +449,34 @@ const formattedDate = date ? formatter.format(date) : '';
             });
         });
 
-        const shareButtons = document.querySelectorAll('.share-button');
-        
-        shareButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const title = button.getAttribute('data-title') || '';
-                const text = button.getAttribute('data-text') || '';
-                const url = button.getAttribute('data-url') || window.location.href;
-                const msgCopied = button.getAttribute('data-msg-copied') || 'Copied!';
-                
+        const shareButtons = document.querySelectorAll(".share-button");
+        shareButtons.forEach((button) => {
+            button.addEventListener("click", async () => {
+                const title = button.getAttribute("data-title") || "";
+                const text = button.getAttribute("data-text") || "";
+                const url =
+                    button.getAttribute("data-url") || window.location.href;
+                const msgCopied =
+                    button.getAttribute("data-msg-copied") || "Copied!";
+
                 if (navigator.share) {
                     try {
                         await navigator.share({
                             title: title,
                             text: text,
-                            url: url
+                            url: url,
                         });
                     } catch (err) {
-                        console.error('Error sharing:', err);
+                        console.error("Error sharing:", err);
                     }
                 } else {
                     try {
-                        await navigator.clipboard.writeText(`${title} - ${url}`);
+                        await navigator.clipboard.writeText(
+                            `${title} - ${url}`,
+                        );
                         alert(msgCopied);
                     } catch (err) {
-                        console.error('Failed to copy: ', err);
+                        console.error("Failed to copy: ", err);
                     }
                 }
             });
@@ -349,7 +489,7 @@ const formattedDate = date ? formatter.format(date) : '';
         background-color: var(--color-white);
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         margin-block-end: 2rem;
         border: 1px solid var(--color-sand);
     }
@@ -394,20 +534,20 @@ const formattedDate = date ? formatter.format(date) : '';
         border: none;
         border-radius: 12px;
         padding: 0;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         max-width: 90%;
         width: 400px;
     }
-    
+
     .registration-modal::backdrop {
         background-color: rgba(0, 0, 0, 0.5);
     }
-    
+
     .modal-content {
         padding: 2rem;
         position: relative;
     }
-    
+
     .close-modal {
         position: absolute;
         top: 1rem;
@@ -424,38 +564,38 @@ const formattedDate = date ? formatter.format(date) : '';
     }
 
     .close-modal:hover {
-        background-color: rgba(0,0,0,0.05);
+        background-color: rgba(0, 0, 0, 0.05);
     }
-    
+
     .modal-header {
         margin-block-end: 1.5rem;
         text-align: center;
         padding-inline-end: 1rem;
     }
-    
+
     .modal-header h4 {
         margin-block-end: 0.5rem;
         color: var(--color-primary);
         font-size: 1.25rem;
     }
-    
+
     .modal-header p {
         margin: 0.25rem 0;
         font-size: 0.95rem;
         color: var(--color-warm-wood);
     }
-    
+
     .form-group {
         margin-block-end: 1.25rem;
     }
-    
+
     .form-group label {
         display: block;
         margin-block-end: 0.5rem;
         font-weight: 500;
         font-size: 0.9rem;
     }
-    
+
     .form-group input,
     .form-group textarea {
         width: 100%;
@@ -466,14 +606,14 @@ const formattedDate = date ? formatter.format(date) : '';
         font-size: 1rem;
         box-sizing: border-box;
     }
-    
+
     .form-group input:focus,
     .form-group textarea:focus {
         outline: none;
         border-color: var(--color-primary);
         box-shadow: 0 0 0 2px rgba(9, 64, 103, 0.1);
     }
-    
+
     .submit-register-btn {
         width: 100%;
         margin-block-start: 1rem;
