@@ -92,6 +92,9 @@ export const ui = {
         'gb.form.error': 'אירעה שגיאה בפרסום ההודעה. אנא נסה שוב.',
         'gb.empty': 'ספר האורחים עדיין ריק. תהיו הראשונים לכתוב משהו!',
         'gb.loading': 'טוען...',
+        'potluck.title': 'מה תרצו להביא איתכם? (רשות)',
+        'potluck.customInput': 'מביאים משהו אחר? כתבו כאן',
+        'potluck.add': 'הוסף',
     },
     en: {
         'site.description': 'BINA Community House in Puerto Viejo, Costa Rica. Your Israeli-Jewish home in Central America for Shabbat dinners, holidays, community meetups, and travel recommendations.',
@@ -178,6 +181,9 @@ export const ui = {
         'gb.form.error': 'An error occurred while posting your message. Please try again.',
         'gb.empty': 'The guestbook is empty. Be the first to write something!',
         'gb.loading': 'Loading posts...',
+        'potluck.title': 'What would you like to bring? (Optional)',
+        'potluck.customInput': 'Bringing something else?',
+        'potluck.add': 'Add',
     },
     es: {
         'site.description': 'BINA Casa Comunitaria en Puerto Viejo, Costa Rica. Tu hogar judío-israelí en América Central para cenas de Shabat, festividades, encuentros comunitarios y recomendaciones de viaje.',
@@ -264,5 +270,8 @@ export const ui = {
         'gb.form.error': 'Ocurrió un error al publicar tu mensaje. Por favor, inténtalo de nuevo.',
         'gb.empty': 'El libro de visitas está vacío. ¡Haz la primera publicación!',
         'gb.loading': 'Cargando...',
+        'potluck.title': '¿Qué te gustaría traer? (Opcional)',
+        'potluck.customInput': '¿Traes algo más?',
+        'potluck.add': 'Añadir',
     },
 } as const;

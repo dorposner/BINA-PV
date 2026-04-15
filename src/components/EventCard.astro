@@ -105,13 +105,13 @@ const formattedDate = date ? formatter.format(date) : '';
                 </div>
                 
                 <div class="potluck-container" style="display: none; margin-block-end: 1.5rem;">
-                    <label style="display: block; margin-block-end: 0.5rem; font-weight: 500; font-size: 0.9rem;">מה תרצו להביא איתכם? (רשות)</label>
+                    <label style="display: block; margin-block-end: 0.5rem; font-weight: 500; font-size: 0.9rem;">{t('potluck.title')}</label>
                     <div class="potluck-items-list" style="margin-block-end: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         <!-- Potluck items will be injected here -->
                     </div>
                     <div class="potluck-add-custom" style="display: flex; gap: 0.5rem;">
-                        <input type="text" class="potluck-custom-input" placeholder="Add custom item..." style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;" />
-                        <button type="button" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">Add</button>
+                        <input type="text" class="potluck-custom-input" placeholder={t('potluck.customInput')} style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;" />
+                        <button type="button" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">{t('potluck.add')}</button>
                     </div>
                 </div>
                 
@@ -207,6 +207,7 @@ const formattedDate = date ? formatter.format(date) : '';
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
                         cb.value = val;
+                        cb.setAttribute('value', val);
                         cb.className = 'potluck-checkbox';
                         // Use both property and attribute to ensure CSS :checked and DOM queries pick it up reliably
                         cb.checked = true;
