@@ -207,8 +207,11 @@ const formattedDate = date ? formatter.format(date) : '';
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
                         cb.value = val;
-                        cb.checked = true;
                         cb.className = 'potluck-checkbox';
+                        // Use both property and attribute to ensure CSS :checked and DOM queries pick it up reliably
+                        cb.checked = true;
+                        cb.defaultChecked = true;
+                        cb.setAttribute('checked', 'checked');
                         
                         const span = document.createElement('span');
                         span.textContent = val;
@@ -248,7 +251,15 @@ const formattedDate = date ? formatter.format(date) : '';
                     console.log('Sending POST request to:', scriptUrl);
                     
                     const formData = new FormData(formEl);
-                    const potluckCheckboxes = formEl.querySelectorAll('.potluck-checkbox:checked:not(:disabled)');
+                    
+                    // Explicitly ensure 'name' field is gathered in case form structure behaves unexpectedly
+                    if (!formData.has('name') || !formData.get('name')) {
+                        const nameInput = formEl.querySelector('input[name="name"]') as HTMLInputElement;
+                        if (nameInput) formData.set('name', nameInput.value);
+                    }
+
+                    // Look directly inside potluckList to be absolutely sure we capture dynamically added elements
+                    const potluckCheckboxes = potluckList.querySelectorAll('.potluck-checkbox:checked:not(:disabled)');
                     if (potluckCheckboxes.length > 0) {
                         const items = Array.from(potluckCheckboxes).map(cb => (cb as HTMLInputElement).value).join(', ');
                         formData.append('potluckItems', items);
