@@ -209,6 +209,9 @@ const formattedDate = date ? formatter.format(date) : "";
                         />
                         <button type="button" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">{t('potluck.add') || 'הוסף'}</button>
                     </div>
+                    <small style="display: block; font-size: 0.8rem; color: #888; margin-block-start: 0.35rem; margin-inline-start: 0.25rem;">
+                        {t('potluck.hint') || 'לחצו Enter ↵ כדי להוסיף לרשימה'}
+                    </small>
                 </div>
 
                 <button

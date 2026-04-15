@@ -95,6 +95,7 @@ export const ui = {
         'potluck.title': 'מה תרצו להביא איתכם? (רשות)',
         'potluck.customInput': 'מביאים משהו אחר? כתבו כאן',
         'potluck.add': 'הוסף',
+        'potluck.hint': 'לחצו Enter ↵ כדי להוסיף לרשימה',
     },
     en: {
         'site.description': 'BINA Community House in Puerto Viejo, Costa Rica. Your Israeli-Jewish home in Central America for Shabbat dinners, holidays, community meetups, and travel recommendations.',
@@ -184,6 +185,7 @@ export const ui = {
         'potluck.title': 'What would you like to bring? (Optional)',
         'potluck.customInput': 'Bringing something else?',
         'potluck.add': 'Add',
+        'potluck.hint': 'Press Enter ↵ to add to the list',
     },
     es: {
         'site.description': 'BINA Casa Comunitaria en Puerto Viejo, Costa Rica. Tu hogar judío-israelí en América Central para cenas de Shabat, festividades, encuentros comunitarios y recomendaciones de viaje.',
@@ -273,5 +275,6 @@ export const ui = {
         'potluck.title': '¿Qué te gustaría traer? (Opcional)',
         'potluck.customInput': '¿Traes algo más?',
         'potluck.add': 'Añadir',
+        'potluck.hint': 'Presiona Enter ↵ para añadir a la lista',
     },
 } as const;
