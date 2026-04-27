@@ -291,10 +291,12 @@ const translations = {
                     eventsHtml += `
                         <div class="compact-event">
                             ${imgHtml}
-                            <div class="event-time">${ev.time || 'כל היום'}</div>
-                            <h3 class="event-title">${ev.title}</h3>
-                            ${ev.description ? `<div class="event-desc">${ev.description}</div>` : ''}
-                            ${regBtnHtml}
+                            <div class="compact-event-details">
+                                <div class="event-time">${ev.time || 'כל היום'}</div>
+                                <h3 class="event-title">${ev.title}</h3>
+                                ${ev.description ? `<div class="event-desc">${ev.description}</div>` : ''}
+                                ${regBtnHtml}
+                            </div>
                         </div>
                     `;
                 });
@@ -599,13 +601,22 @@ const translations = {
         margin: 0;
     }
 
-    /* CSS Grid for the 7 days */
+    /* Default Mobile Layout (Agenda View) */
     .schedule-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 0.5rem;
-        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
         flex-grow: 1;
+    }
+
+    /* Desktop Layout (7-column Grid) */
+    @media (min-width: 1024px) {
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            align-items: stretch;
+        }
     }
 
     .day-column {
@@ -620,6 +631,23 @@ const translations = {
         min-width: 0; /* Prevents grid blowout from large images */
     }
 
+    /* Mobile specific day-column adjustments */
+    @media (max-width: 1023px) {
+        /* Hide days with no events on mobile to save space */
+        .day-column:not(.has-events) {
+            display: none;
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .day-name { font-size: 1.25rem !important; }
+        .day-date { font-size: 1rem !important; margin-top: 0 !important; }
+    }
+
     .day-column:hover {
         box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         transform: translateY(-2px);
@@ -632,7 +660,7 @@ const translations = {
 
     .day-header {
         background-color: #f8fafc;
-        padding: 0.5rem;
+        padding: 0.5rem 1rem;
         text-align: center;
         border-bottom: 1px solid rgba(0,0,0,0.05);
     }
@@ -696,6 +724,28 @@ const translations = {
         flex-direction: column;
         height: 100%;
         min-width: 0; /* Prevents flexbox blowout */
+    }
+
+    /* Mobile specific event adjustments */
+    @media (max-width: 1023px) {
+        .compact-event {
+            flex-direction: row;
+            gap: 1rem;
+            align-items: stretch;
+            padding: 0.75rem;
+        }
+        
+        .compact-event-image-wrapper {
+            width: 120px !important;
+            height: auto !important;
+            margin-bottom: 0 !important;
+        }
+    }
+
+    .compact-event-details {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
     }
 
     .compact-event-image-wrapper {
