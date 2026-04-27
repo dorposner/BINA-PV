@@ -1,0 +1,861 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations, getFallbackCollectionItems, useDir } from '../../i18n/utils';
+import { marked } from 'marked';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: undefined } },
+    { params: { lang: 'en' } },
+    { params: { lang: 'es' } },
+  ];
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const dir = useDir(lang);
+
+const allEvents = await getCollection('events');
+const rawEvents = getFallbackCollectionItems(lang, allEvents);
+
+// Format events for client side
+const clientEvents = rawEvents.map(e => {
+    // We need the Hebrew title for the registration form
+    const hebrewEvent = allEvents.find(
+        (he) => he.id.startsWith("he/") &&
+            (he.data.permalink === e.data.permalink || he.id.split("/").pop() === e.id.split("/").pop())
+    );
+    const hebrewTitle = hebrewEvent ? hebrewEvent.data.title : e.data.title;
+    
+    // Parse description Markdown to HTML ahead of time
+    const parsedDesc = marked.parse(e.data.description || "");
+
+    return {
+        title: e.data.title,
+        hebrewTitle: hebrewTitle,
+        dateStr: e.data.date, // ISO string
+        time: e.data.time,
+        description: parsedDesc,
+        image: e.data.image,
+        registrationLink: e.data.registrationLink,
+        hide_registration: e.data.hide_registration
+    };
+});
+
+const title = lang === 'he' ? 'לו"ז שבועי' : lang === 'es' ? 'Horario Semanal' : 'Weekly Schedule';
+const prevWeekText = lang === 'he' ? 'שבוע קודם' : lang === 'es' ? 'Semana Anterior' : 'Previous Week';
+const nextWeekText = lang === 'he' ? 'שבוע הבא' : lang === 'es' ? 'Próxima Semana' : 'Next Week';
+const noEventsText = lang === 'he' ? 'אין אירועים' : lang === 'es' ? 'No hay eventos' : 'No events';
+
+const dayNamesHebrew = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const dayNamesEnglish = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const dayNamesSpanish = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const dayNames = lang === 'he' ? dayNamesHebrew : lang === 'es' ? dayNamesSpanish : dayNamesEnglish;
+
+const translations = {
+    lang,
+    locale: lang === 'he' ? 'he-IL' : lang === 'es' ? 'es-CR' : 'en-US',
+    dayNames,
+    noEventsText,
+    registerText: lang === 'he' ? 'הרשמה' : lang === 'es' ? 'Registro' : 'Register',
+    formSuccess: t("form.success"),
+    formError: t("form.error"),
+    formRedirecting: t("form.redirecting"),
+    formClose: t("form.close"),
+    formTitle: t("form.title"),
+    formName: t("form.name"),
+    formPhone: t("form.phone"),
+    formEmail: t("form.email"),
+    formParticipants: t("form.participants"),
+    formNotes: t("form.notes"),
+    formSubmit: t("form.submit"),
+    potluckTitle: t("potluck.title"),
+    potluckCustomInput: t("potluck.customInput"),
+    potluckAdd: t("potluck.add") || "הוסף",
+    potluckHint: t("potluck.hint") || "לחצו Enter ↵ כדי להוסיף לרשימה"
+};
+---
+
+<Layout title={title}>
+    <section class="weekly-schedule-section" dir={dir}>
+        <div class="schedule-wrapper">
+            <div class="schedule-header">
+                <h1 class="page-title">{title}</h1>
+                <div class="pagination-controls">
+                    <button id="prev-week-btn" class="button button-outline pagination-btn">
+                        <span class="arrow">{dir === 'rtl' ? '→' : '←'}</span> {prevWeekText}
+                    </button>
+                    <p class="week-dates" id="week-dates-display">
+                        <!-- Dates populated by JS -->
+                    </p>
+                    <button id="next-week-btn" class="button button-outline pagination-btn">
+                        {nextWeekText} <span class="arrow">{dir === 'rtl' ? '←' : '→'}</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="schedule-grid" id="schedule-grid-container">
+                <!-- Grid populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Modal Template -->
+    <dialog class="registration-modal" id="schedule-registration-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="schedule-close-modal" aria-label={translations.formClose}>&times;</button>
+            <div class="modal-header">
+                <h4>{translations.formTitle}</h4>
+                <p><strong id="modal-event-title"></strong></p>
+                <p id="modal-event-datetime"></p>
+            </div>
+            <form
+                class="registration-form"
+                id="schedule-registration-form"
+            >
+                <input type="hidden" name="eventName" id="form-event-name" value="" />
+                <input type="hidden" name="eventDate" id="form-event-date" value="" />
+                <input type="hidden" id="form-redirect-url" value="" />
+
+                <div class="form-group">
+                    <label for="sched-name">{translations.formName} *</label>
+                    <input type="text" id="sched-name" name="name" required autocomplete="name" />
+                </div>
+
+                <div class="form-group">
+                    <label for="sched-phone">{translations.formPhone} *</label>
+                    <input type="tel" id="sched-phone" name="phone" required dir="ltr" autocomplete="tel" />
+                </div>
+
+                <div class="form-group">
+                    <label for="sched-email">{translations.formEmail}</label>
+                    <input type="email" id="sched-email" name="email" dir="ltr" autocomplete="email" />
+                </div>
+
+                <div class="form-group">
+                    <label for="sched-participants">{translations.formParticipants}</label>
+                    <input type="number" id="sched-participants" name="participants" min="1" value="1" required autocomplete="off" />
+                </div>
+
+                <div class="form-group">
+                    <label for="sched-notes">{translations.formNotes}</label>
+                    <textarea id="sched-notes" name="notes" rows="3"></textarea>
+                </div>
+
+                <div class="potluck-container" id="sched-potluck-container" style="display: none; margin-block-end: 1.5rem;">
+                    <label style="display: block; margin-block-end: 0.5rem; font-weight: 500; font-size: 0.9rem;">{translations.potluckTitle}</label>
+                    <div class="potluck-items-list" id="sched-potluck-list" style="margin-block-end: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Potluck items injected here -->
+                    </div>
+                    <div class="potluck-add-custom" style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="sched-potluck-input" class="potluck-custom-input" placeholder={translations.potluckCustomInput} style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem;" />
+                        <button type="button" id="sched-potluck-add" class="button potluck-custom-add-btn" style="padding: 0.75rem 1rem; background-color: var(--color-warm-wood); color: white; border: none; border-radius: 6px; cursor: pointer;">{translations.potluckAdd}</button>
+                    </div>
+                    <small style="display: block; font-size: 0.8rem; color: #888; margin-block-start: 0.35rem; margin-inline-start: 0.25rem;">
+                        {translations.potluckHint}
+                    </small>
+                </div>
+
+                <button type="submit" class="button button-primary submit-register-btn" id="sched-submit-btn">{translations.formSubmit}</button>
+            </form>
+        </div>
+    </dialog>
+</Layout>
+
+<script is:inline define:vars={{ clientEvents, translations }}>
+    const gridContainer = document.getElementById('schedule-grid-container');
+    const datesDisplay = document.getElementById('week-dates-display');
+    const prevBtn = document.getElementById('prev-week-btn');
+    const nextBtn = document.getElementById('next-week-btn');
+    
+    // Convert string dates to Date objects early
+    const events = clientEvents.map(e => ({
+        ...e,
+        parsedDate: new Date(e.dateStr)
+    }));
+
+    // Get current date in Costa Rica timezone to avoid server UTC issues
+    const nowStr = new Date().toLocaleString("en-US", {timeZone: "America/Costa_Rica"});
+    const todayDate = new Date(nowStr);
+    todayDate.setHours(0, 0, 0, 0);
+
+    let currentDay = todayDate.getDay(); // 0 is Sunday, 6 is Saturday
+    let startOfWeek = new Date(todayDate);
+    startOfWeek.setDate(todayDate.getDate() - currentDay);
+
+    // Hardcode a check: if today is Sunday, and there are no events this week but there were events last week, 
+    // they probably mean the week that is ending today.
+    const testNextWeekEvents = events.filter(e => {
+        return e.parsedDate >= startOfWeek && e.parsedDate < new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+    });
+    if (currentDay === 0 && testNextWeekEvents.length === 0) {
+        // Show the week that just ended (Sunday to Saturday) so they see the 3 events
+        startOfWeek.setDate(startOfWeek.getDate() - 7);
+    }
+
+    let currentRenderDate = new Date(startOfWeek);
+
+    function formatDate(date) {
+        return new Intl.DateTimeFormat(translations.locale, {
+            month: 'short',
+            day: 'numeric'
+        }).format(date);
+    }
+
+    function isToday(date) {
+        const d = new Date(nowStr);
+        return date.getDate() === d.getDate() && date.getMonth() === d.getMonth() && date.getFullYear() === d.getFullYear();
+    }
+    
+    function isPast(date) {
+        const d = new Date(nowStr);
+        // Compare without time
+        const evDate = new Date(date);
+        evDate.setHours(0,0,0,0);
+        d.setHours(0,0,0,0);
+        return evDate < d;
+    }
+
+    function renderWeek(weekStart) {
+        // Update week dates display
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        datesDisplay.textContent = `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
+
+        gridContainer.innerHTML = '';
+
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(weekStart);
+            dayDate.setDate(weekStart.getDate() + i);
+            
+            const nextDay = new Date(dayDate);
+            nextDay.setDate(dayDate.getDate() + 1);
+
+            const dayEvents = events.filter(e => e.parsedDate >= dayDate && e.parsedDate < nextDay)
+                                    .sort((a, b) => a.parsedDate.valueOf() - b.parsedDate.valueOf());
+
+            const isTodayClass = isToday(dayDate) ? 'today' : '';
+            const hasEventsClass = dayEvents.length > 0 ? 'has-events' : '';
+
+            let eventsHtml = '';
+            if (dayEvents.length > 0) {
+                eventsHtml = `<div class="events-list">`;
+                dayEvents.forEach((ev, idx) => {
+                    const past = isPast(dayDate);
+                    let regBtnHtml = '';
+                    
+                    if (!past && !ev.hide_registration) {
+                        // Store event info in data attributes for the modal
+                        const encodedTitle = encodeURIComponent(ev.title);
+                        const encodedHebrew = encodeURIComponent(ev.hebrewTitle || '');
+                        const evTime = ev.time || '';
+                        
+                        const hebrewFormatter = new Intl.DateTimeFormat("he-IL", {
+                            weekday: "long", year: "numeric", month: "long", day: "numeric"
+                        });
+                        const hebrewFormattedDate = hebrewFormatter.format(ev.parsedDate);
+                        const eventDateStr = encodeURIComponent(`${hebrewFormattedDate}${evTime ? ` | ${evTime}` : ""}`);
+                        
+                        // Formatted date for display in modal
+                        const displayFormatter = new Intl.DateTimeFormat(translations.locale, {
+                            weekday: "long", year: "numeric", month: "long", day: "numeric"
+                        });
+                        const displayFormattedDate = displayFormatter.format(ev.parsedDate);
+                        const modalDisplayDate = encodeURIComponent(`${displayFormattedDate}${evTime ? ` | ${evTime}` : ""}`);
+
+                        regBtnHtml = `
+                            <button 
+                                class="button button-primary register-btn open-modal-trigger"
+                                data-title="${encodedTitle}"
+                                data-hebrew-title="${encodedHebrew}"
+                                data-event-date="${eventDateStr}"
+                                data-modal-date="${modalDisplayDate}"
+                                data-redirect="${ev.registrationLink || ''}"
+                                style="margin-top: auto; padding: 0.3rem 0.5rem; font-size: 0.8rem; width: 100%; border: none; cursor: pointer; text-align: center;"
+                            >
+                                ${translations.registerText}
+                            </button>
+                        `;
+                    }
+
+                    let imgHtml = '';
+                    if (ev.image) {
+                        imgHtml = `
+                            <div class="compact-event-image-wrapper">
+                                <img src="${ev.image}" alt="${ev.title}" class="compact-event-image" loading="lazy" />
+                            </div>
+                        `;
+                    }
+
+                    eventsHtml += `
+                        <div class="compact-event">
+                            ${imgHtml}
+                            <div class="event-time">${ev.time || 'כל היום'}</div>
+                            <h3 class="event-title">${ev.title}</h3>
+                            ${ev.description ? `<div class="event-desc">${ev.description}</div>` : ''}
+                            ${regBtnHtml}
+                        </div>
+                    `;
+                });
+                eventsHtml += `</div>`;
+            } else {
+                eventsHtml = `<div class="no-events"><p>-</p></div>`;
+            }
+
+            const dayColHtml = `
+                <div class="day-column ${isTodayClass} ${hasEventsClass}">
+                    <div class="day-header">
+                        <h2 class="day-name">${translations.dayNames[dayDate.getDay()]}</h2>
+                        <span class="day-date">${formatDate(dayDate)}</span>
+                    </div>
+                    <div class="day-content">
+                        ${eventsHtml}
+                    </div>
+                </div>
+            `;
+            gridContainer.insertAdjacentHTML('beforeend', dayColHtml);
+        }
+
+        attachModalListeners();
+    }
+
+    prevBtn.addEventListener('click', () => {
+        currentRenderDate.setDate(currentRenderDate.getDate() - 7);
+        renderWeek(currentRenderDate);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentRenderDate.setDate(currentRenderDate.getDate() + 7);
+        renderWeek(currentRenderDate);
+    });
+
+    // ----------------------------------------------------
+    // Modal & Registration Logic
+    // ----------------------------------------------------
+    const modal = document.getElementById('schedule-registration-modal');
+    const closeBtn = document.getElementById('schedule-close-modal');
+    const form = document.getElementById('schedule-registration-form');
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbzQ9AWpcYFWoeUXDszt5Ma2dSpo2RExUslIw53IBTI50PXwORL6Tge4of2KtOKn_RyM/exec";
+
+    closeBtn.addEventListener("click", () => {
+        if (modal && typeof modal.close === "function") {
+            modal.close();
+        }
+    });
+
+    function attachModalListeners() {
+        const triggers = document.querySelectorAll('.open-modal-trigger');
+        triggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Populate Modal Data
+                const title = decodeURIComponent(btn.getAttribute('data-title'));
+                const hebrewTitle = decodeURIComponent(btn.getAttribute('data-hebrew-title'));
+                const eventDateStr = decodeURIComponent(btn.getAttribute('data-event-date'));
+                const modalDate = decodeURIComponent(btn.getAttribute('data-modal-date'));
+                const redirect = btn.getAttribute('data-redirect');
+
+                document.getElementById('modal-event-title').textContent = title;
+                document.getElementById('modal-event-datetime').textContent = modalDate;
+                
+                document.getElementById('form-event-name').value = hebrewTitle;
+                document.getElementById('form-event-date').value = eventDateStr;
+                document.getElementById('form-redirect-url').value = redirect;
+
+                // Handle Potluck
+                const potluckContainer = document.getElementById('sched-potluck-container');
+                const potluckList = document.getElementById('sched-potluck-list');
+                potluckList.innerHTML = '';
+                potluckContainer.style.display = 'none';
+
+                if (hebrewTitle) {
+                    fetch(`${scriptUrl}?action=getPotluck&eventName=${encodeURIComponent(hebrewTitle)}`)
+                        .then((res) => res.json())
+                        .then((data) => {
+                            if (Array.isArray(data) && data.length > 0) {
+                                potluckContainer.style.display = "block";
+                                data.forEach((itemInfo) => {
+                                    const label = document.createElement("label");
+                                    label.style.display = "flex";
+                                    label.style.alignItems = "center";
+                                    label.style.gap = "0.5rem";
+                                    label.style.cursor = itemInfo.status === "taken" ? "not-allowed" : "pointer";
+
+                                    const cb = document.createElement("input");
+                                    cb.type = "checkbox";
+                                    cb.value = itemInfo.item;
+                                    cb.className = "potluck-checkbox";
+
+                                    const span = document.createElement("span");
+                                    span.textContent = itemInfo.item;
+
+                                    if (itemInfo.status === "taken") {
+                                        cb.disabled = true;
+                                        cb.checked = true;
+                                        span.style.textDecoration = "line-through";
+                                        span.style.color = "#999";
+                                    }
+
+                                    label.appendChild(cb);
+                                    label.appendChild(span);
+                                    potluckList.appendChild(label);
+                                });
+                            }
+                        })
+                        .catch((e) => console.error("Error fetching potluck items:", e));
+                }
+
+                if (modal && typeof modal.showModal === "function") {
+                    modal.showModal();
+                }
+            });
+        });
+    }
+
+    // Custom Potluck Add
+    const potluckInput = document.getElementById('sched-potluck-input');
+    const potluckAddBtn = document.getElementById('sched-potluck-add');
+    const potluckContainer = document.getElementById('sched-potluck-container');
+    const potluckList = document.getElementById('sched-potluck-list');
+
+    if (potluckInput && potluckAddBtn) {
+        potluckInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                potluckAddBtn.click();
+            }
+        });
+
+        potluckAddBtn.addEventListener('click', () => {
+            const val = potluckInput.value.trim();
+            if (val) {
+                potluckContainer.style.display = "block";
+                const label = document.createElement("label");
+                label.style.display = "flex";
+                label.style.alignItems = "center";
+                label.style.gap = "0.5rem";
+                label.style.cursor = "pointer";
+
+                const cb = document.createElement("input");
+                cb.type = "checkbox";
+                cb.value = val;
+                cb.className = "potluck-checkbox";
+                cb.checked = true;
+
+                cb.style.width = "1.2rem";
+                cb.style.height = "1.2rem";
+                cb.style.minWidth = "1.2rem";
+                cb.style.display = "inline-block";
+                cb.style.flexShrink = "0";
+                cb.style.margin = "0";
+
+                const span = document.createElement("span");
+                span.textContent = val;
+
+                label.appendChild(cb);
+                label.appendChild(span);
+                potluckList.appendChild(label);
+
+                potluckInput.value = "";
+            }
+        });
+    }
+
+    // Form Submit
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('sched-submit-btn');
+            const originalBtnText = submitBtn.textContent;
+            const redirectUrl = document.getElementById('form-redirect-url').value;
+
+            submitBtn.textContent = "...";
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(form);
+                if (!formData.has("name") || !formData.get("name")) {
+                    const nameInput = document.getElementById('sched-name');
+                    if (nameInput) formData.set("name", nameInput.value);
+                }
+
+                const potluckCheckboxes = document.querySelectorAll('#sched-potluck-list input[type="checkbox"]:checked:not(:disabled)');
+                if (potluckCheckboxes.length > 0) {
+                    const items = Array.from(potluckCheckboxes)
+                        .map((cb) => cb.value.trim())
+                        .filter((val) => val !== "" && val !== "on");
+
+                    if (items.length > 0) {
+                        formData.set("potluckItems", items.join(","));
+                    }
+                }
+
+                await fetch(scriptUrl, {
+                    method: "POST",
+                    mode: "no-cors",
+                    body: formData,
+                });
+            } catch (err) {
+                console.log("Fetch rejected due to CORB, but data was sent:", err);
+            } finally {
+                if (redirectUrl && redirectUrl.trim() !== "") {
+                    requestAnimationFrame(() => {
+                        alert(translations.formRedirecting);
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 1500);
+                    });
+                } else {
+                    requestAnimationFrame(() => {
+                        alert(translations.formSuccess);
+                    });
+                    form.reset();
+                    if (modal && typeof modal.close === "function") {
+                        modal.close();
+                    }
+                }
+
+                if (!redirectUrl || redirectUrl.trim() === "") {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            }
+        });
+    }
+
+    // Initial render
+    renderWeek(currentRenderDate);
+</script>
+
+<style is:global>
+    .weekly-schedule-section {
+        padding: 2rem 1rem 4rem;
+        background-color: var(--color-background);
+        min-height: calc(100vh - 200px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .schedule-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .schedule-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: var(--color-brand-blue);
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .pagination-btn {
+        background-color: transparent;
+        color: var(--color-brand-blue);
+        border: 2px solid var(--color-brand-blue);
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .pagination-btn:hover {
+        background-color: var(--color-brand-blue);
+        color: var(--color-white);
+        opacity: 1;
+    }
+
+    .week-dates {
+        font-size: 1.1rem;
+        color: var(--color-warm-wood, #8b5a2b);
+        font-weight: 500;
+        background-color: var(--color-white);
+        display: inline-block;
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin: 0;
+    }
+
+    /* CSS Grid for the 7 days */
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        align-items: stretch;
+        flex-grow: 1;
+    }
+
+    .day-column {
+        background: var(--color-white);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        border: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        min-width: 0; /* Prevents grid blowout from large images */
+    }
+
+    .day-column:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+
+    .day-column.today {
+        border: 2px solid var(--color-brand-blue);
+        box-shadow: 0 6px 15px rgba(0, 140, 255, 0.15);
+    }
+
+    .day-header {
+        background-color: #f8fafc;
+        padding: 0.5rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .day-column.has-events .day-header {
+        background-color: var(--color-brand-blue);
+        color: var(--color-white);
+        border-bottom: none;
+    }
+    
+    .day-column.today.has-events .day-header {
+        background-color: var(--color-brand-blue);
+    }
+
+    .day-name {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: inherit;
+    }
+
+    .day-column:not(.has-events) .day-name {
+        color: var(--color-text);
+    }
+
+    .day-date {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-top: 0.2rem;
+    }
+
+    .day-content {
+        padding: 0.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: #fafbfc;
+        min-width: 0;
+    }
+    
+    .day-column.has-events .day-content {
+        background-color: var(--color-white);
+    }
+
+    .events-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        height: 100%;
+        min-width: 0;
+    }
+
+    .compact-event {
+        background-color: #f0f7ff;
+        border-radius: 6px;
+        padding: 0.5rem;
+        border-inline-start: 3px solid var(--color-brand-blue);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-width: 0; /* Prevents flexbox blowout */
+    }
+
+    .compact-event-image-wrapper {
+        width: 100%;
+        height: 100px;
+        overflow: hidden;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .compact-event-image {
+        width: 100%;
+        height: 100%;
+        max-width: 100%; /* Safety against oversized images */
+        object-fit: cover;
+        display: block;
+    }
+
+    .event-time {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--color-brand-blue);
+        margin-bottom: 0.2rem;
+    }
+
+    .event-title {
+        font-size: 0.9rem;
+        margin: 0 0 0.4rem 0;
+        line-height: 1.2;
+        color: var(--color-text);
+        font-weight: 700;
+    }
+
+    .event-desc {
+        font-size: 0.8rem;
+        color: #555;
+        line-height: 1.3;
+        margin-bottom: 0.5rem;
+        flex-grow: 1;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+    
+    .event-desc :global(p) {
+        margin: 0 0 0.4rem 0;
+    }
+    .event-desc :global(p:last-child) {
+        margin: 0;
+    }
+
+    .no-events {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        color: #cbd5e1;
+        font-size: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        .pagination-controls {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+
+    /* Modal Styles */
+    .registration-modal {
+        border: none;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 90%;
+        width: 400px;
+    }
+
+    .registration-modal::backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        padding: 2rem;
+        position: relative;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        inset-inline-end: 1rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--color-warm-wood);
+        line-height: 1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .close-modal:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .modal-header {
+        margin-block-end: 1.5rem;
+        text-align: center;
+        padding-inline-end: 1rem;
+    }
+
+    .modal-header h4 {
+        margin-block-end: 0.5rem;
+        color: var(--color-primary);
+        font-size: 1.25rem;
+    }
+
+    .modal-header p {
+        margin: 0.25rem 0;
+        font-size: 0.95rem;
+        color: var(--color-warm-wood);
+    }
+
+    .form-group {
+        margin-block-end: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-block-end: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(9, 64, 103, 0.1);
+    }
+
+    .submit-register-btn {
+        width: 100%;
+        margin-block-start: 1rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+</style>
