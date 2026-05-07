@@ -2,10 +2,12 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
+import react from "@astrojs/react";
+
 // https://astro.build/config
 export default defineConfig({
     site: 'https://bina.kesher.me',
-    integrations: [sitemap()],
+    integrations: [sitemap(), react()],
     i18n: {
         defaultLocale: "he",
         locales: ["he", "en"],
