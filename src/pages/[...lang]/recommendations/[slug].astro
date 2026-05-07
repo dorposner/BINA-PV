@@ -32,9 +32,18 @@ const basePath = lang === 'he' ? '' : '/' + lang;
 
 const filteredGallery = (imageGallery || []).filter(img => img && img.trim() !== '');
 const ogImage = filteredGallery.length > 0 ? filteredGallery[0] : undefined;
+
+const placeSchema = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    "name": title,
+    "description": description || title,
+    "image": ogImage ? new URL(ogImage, Astro.site || Astro.url.origin).toString() : undefined,
+    "url": externalLink || undefined
+};
 ---
 
-<Layout title={title} description={description} image={ogImage}>
+<Layout title={title} description={description} image={ogImage} schema={placeSchema}>
     <article class="single-reco container">
         <header class="reco-header">
             <h1>{title}</h1>

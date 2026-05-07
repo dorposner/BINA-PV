@@ -37,9 +37,25 @@ const formattedDate = new Intl.DateTimeFormat(locale, {
     month: 'long',
     day: 'numeric'
 }).format(date);
+
+const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": title,
+    "description": description || title,
+    "image": image ? new URL(image, Astro.site || Astro.url.origin).toString() : undefined,
+    "datePublished": date ? new Date(date).toISOString() : undefined,
+    "author": author ? {
+        "@type": "Person",
+        "name": author
+    } : {
+        "@type": "Organization",
+        "name": "BINA Puerto Viejo"
+    }
+};
 ---
 
-<Layout title={title} description={description} image={image}>
+<Layout title={title} description={description} image={image} schema={articleSchema}>
     <article class="single-post container">
         <header class="post-header">
             <a href={`${basePath}/blog`} class="back-link">{lang === 'he' ? '← חזרה לבלוג' : '← Back to Blog'}</a>

@@ -45,9 +45,29 @@ const formatter = new Intl.DateTimeFormat(locale, {
     day: "numeric",
 });
 const formattedDate = date ? formatter.format(date) : "";
+
+// Generate Schema.org Event JSON
+const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": title,
+    "startDate": date ? new Date(date).toISOString() : undefined,
+    "location": {
+        "@type": "Place",
+        "name": "BINA Puerto Viejo",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Puerto Viejo",
+            "addressCountry": "CR"
+        }
+    },
+    "description": description || title,
+    "image": image ? new URL(image.src || image, Astro.site || Astro.url.origin).toString() : undefined
+};
 ---
 
 <article class="event-card">
+    <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} />
     {
         image && (
             <div class="event-image-wrapper">

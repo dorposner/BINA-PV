@@ -8,9 +8,10 @@ interface Props {
 	title: string;
 	description?: string;
 	image?: string;
+	schema?: object;
 }
 
-const { title, description, image = "https://bina.kesher.me/og-image.png" } = Astro.props;
+const { title, description, image = "https://bina.kesher.me/og-image.png", schema } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
 const siteTitle = lang === 'he' ? 'בית בינה פורטו וייחו' : 'BINA Puerto Viejo';
 const t = useTranslations(lang);
@@ -50,6 +51,9 @@ const basePath = lang === 'he' ? '' : '/' + lang;
 
 		  gtag('config', 'G-XH5M9EV732');
 		</script>
+        {schema && (
+            <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+        )}
 	</head>
 	<body>
         <header class="site-header">
