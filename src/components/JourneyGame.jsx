@@ -436,7 +436,7 @@ export default function JourneyGame() {
           {history.length > 1 ? (
             <button 
               onClick={handleBack}
-              className="flex items-center gap-2 text-stone-500 hover:text-stone-800 transition px-4 py-2 rounded-lg hover:bg-stone-200"
+              className="flex items-center gap-2 text-stone-500 hover:text-stone-800 transition px-4 py-2 rounded-lg hover:bg-stone-200 bg-transparent"
             >
               <ArrowRight className="w-4 h-4" />
               חזור שלב אחורה
@@ -448,7 +448,7 @@ export default function JourneyGame() {
           {!nodeData.isEnd && (
             <button 
               onClick={handleRestart}
-              className="flex items-center gap-2 text-stone-500 hover:text-red-600 transition px-4 py-2 rounded-lg hover:bg-red-50"
+              className="flex items-center gap-2 text-stone-500 hover:text-red-600 transition px-4 py-2 rounded-lg hover:bg-red-50 bg-transparent"
             >
               <RotateCcw className="w-4 h-4" />
               התחל מחדש
