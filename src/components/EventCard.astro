@@ -46,28 +46,78 @@ const formatter = new Intl.DateTimeFormat(locale, {
 });
 const formattedDate = date ? formatter.format(date) : "";
 
+const englishEvent = allEvents.find(
+    (e: any) =>
+        e.id.startsWith("en/") &&
+        (e.data.permalink === event.data.permalink ||
+            e.id.split("/").pop() === event.id.split("/").pop()),
+);
+const englishTitle = englishEvent ? englishEvent.data.title : event.data.title;
+
+let startDateStr;
+let endDateStr;
+
+if (date) {
+    const baseDate = new Date(date);
+    if (time) {
+        const timeMatch = time.match(/(\d{1,2}):(\d{2})/);
+        if (timeMatch) {
+            const dateISO = baseDate.toISOString().split('T')[0];
+            const hh = timeMatch[1].padStart(2, '0');
+            const min = timeMatch[2].padStart(2, '0');
+            startDateStr = `${dateISO}T${hh}:${min}:00-06:00`;
+            endDateStr = new Date(new Date(startDateStr).getTime() + 2 * 60 * 60 * 1000).toISOString();
+        } else {
+            startDateStr = baseDate.toISOString();
+            endDateStr = new Date(baseDate.getTime() + 2 * 60 * 60 * 1000).toISOString();
+        }
+    } else {
+        startDateStr = baseDate.toISOString();
+        endDateStr = new Date(baseDate.getTime() + 2 * 60 * 60 * 1000).toISOString();
+    }
+}
+
+const plainDescription = (description || title).replace(/<[^>]*>?/gm, '');
+
 // Generate Schema.org Event JSON
 const eventSchema = {
     "@context": "https://schema.org",
     "@type": "Event",
-    "name": title,
-    "startDate": date ? new Date(date).toISOString() : undefined,
+    "name": englishTitle,
+    "startDate": startDateStr,
+    "endDate": endDateStr,
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
     "location": {
         "@type": "Place",
-        "name": "BINA Puerto Viejo",
+        "name": "BINA House Puerto Viejo",
         "address": {
             "@type": "PostalAddress",
-            "addressLocality": "Puerto Viejo",
+            "addressLocality": "Puerto Viejo de Talamanca",
             "addressCountry": "CR"
         }
     },
-    "description": description || title,
-    "image": image ? new URL(image.src || image, Astro.site || Astro.url.origin).toString() : undefined
+    "description": plainDescription,
+    "image": image ? new URL(image.src || image, Astro.site || Astro.url.origin).toString() : undefined,
+    "performer": {
+        "@type": "Organization",
+        "name": "BINA House"
+    },
+    "organizer": {
+        "@type": "Organization",
+        "name": "BINA House",
+        "url": "https://bina.kesher.me"
+    },
+    "offers": {
+        "@type": "Offer",
+        "price": event.data.price !== undefined ? String(event.data.price) : "0",
+        "priceCurrency": event.data.priceCurrency || "ILS",
+        "url": registrationLink && registrationLink !== "" ? registrationLink : "https://bina.kesher.me"
+    }
 };
 ---
 
 <article class="event-card">
-    <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} />
     {
         image && (
             <div class="event-image-wrapper">
@@ -242,6 +292,7 @@ const eventSchema = {
             </form>
         </div>
     </dialog>
+    <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} />
 </article>
 
 <script>
