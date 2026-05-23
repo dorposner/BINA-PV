@@ -113,6 +113,9 @@ const basePath = lang === 'he' ? '' : '/' + lang;
                     <a href={`${basePath}/guestbook`}>{t('nav.guestbook')}</a>
                     <a href="https://bina.org.il" target="_blank" rel="noopener noreferrer">{t('footer.bina_site')}</a>
                 </div>
+                <div class="footer-contact-info">
+                    <p>{t('footer.contact')}</p>
+                </div>
                 <p>
                     &copy; {new Date().getFullYear()} {t('footer.rights')}
                     <a href="https://shithead.kesher.me/" target="_blank" rel="noopener noreferrer" class="easter-egg-link" title="Play Shithead Online">🃏</a>
@@ -293,5 +296,14 @@ const basePath = lang === 'he' ? '' : '/' + lang;
     .easter-egg-link:hover {
         opacity: 1;
         transform: scale(1.2) rotate(10deg);
+    }
+
+    .footer-contact-info {
+        margin-block-end: 1rem;
+        font-size: 0.95rem;
+        opacity: 0.85;
+    }
+    .footer-contact-info p {
+        margin: 0;
     }
 </style>

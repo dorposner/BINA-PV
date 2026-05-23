@@ -23,12 +23,16 @@ import posnerImg from '../../assets/images/posnerfamily.png';
 import shabbatImg from '../../assets/images/shabbat.png';
 
 const allEvents = await getCollection('events');
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+const now = new Date();
 const rawEvents = getFallbackCollectionItems(lang, allEvents);
-const events = rawEvents.filter(entry => entry.data.date >= today);
+const events = rawEvents.filter(entry => entry.data.date >= now);
 // Sort by date ascending
 const sortedEvents = events.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+
+// Filter and sort past events descending (most recent first)
+const pastEvents = rawEvents.filter(entry => entry.data.date < now);
+const sortedPastEvents = pastEvents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
 
 const basePath = lang === 'he' ? '' : '/' + lang;
 const allPosts = await getCollection('blog');
@@ -55,29 +59,22 @@ const latestPosts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.
 
                 <p>{t('about.p2')}</p>
 
+                <div class="instagram-follow-container">
+                    <a href="https://instagram.com/posnertravel" target="_blank" rel="noopener noreferrer" class="button button-instagram">
+                        <svg class="instagram-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                        {t('about.instagram.cta') || "לעקוב אחרי המשך המסע שלנו באינסטגרם! 📸"}
+                    </a>
+                </div>
+
                 <h3 style="margin-top: 2rem;">{t('about.bina.title')}</h3>
                 <p>{t('about.bina.desc')}</p>
             </div>
             <div class="about-images">
                 <Image src={posnerImg} alt="Posner family" class="about-img main-about-img" />
-            </div>
-        </div>
-    </section>
-
-    <section id="schedule" class="schedule-section">
-        <div class="container">
-            <div class="schedule-header-flex">
-                <h2>{t('schedule.title')}</h2>
-                <a href={`${basePath}/schedule`} class="weekly-link">{t('schedule.weeklyLink') || "Weekly Schedule"}</a>
-            </div>
-            <div class="events-grid">
-                {sortedEvents.length > 0 ? (
-                    sortedEvents.map(event => (
-                        <EventCard event={event} />
-                    ))
-                ) : (
-                    <p>{t('schedule.empty')}</p>
-                )}
             </div>
         </div>
     </section>
@@ -124,6 +121,199 @@ const latestPosts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.
         </div>
     </section>
 
+    <section id="schedule" class="schedule-section">
+        <div class="container">
+            {sortedEvents.length > 0 ? (
+                <>
+                    <div class="schedule-header-flex">
+                        <h2>{t('schedule.title')}</h2>
+                        <a href={`${basePath}/schedule`} class="weekly-link">{t('schedule.weeklyLink') || "Weekly Schedule"}</a>
+                    </div>
+                    <div class="events-grid">
+                        {sortedEvents.map(event => (
+                            <EventCard event={event} />
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <div class="archive-showcase">
+                    <div class="archive-header">
+                        <h2>{t('archive.title') || "אירועים קודמים"}</h2>
+                        <p class="archive-subtitle">{t('archive.subtitle') || "הצצה לפעילויות ולאירועים שכבר חווינו בקהילה."}</p>
+                    </div>
+                    
+                    {sortedPastEvents.length > 0 ? (
+                        <div class="archive-slider-container">
+                            <button class="slider-arrow prev-arrow" aria-label="Previous event">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <div class="archive-slider-clip">
+                                <div class="archive-slider-track" id="archiveTrack">
+                                    {sortedPastEvents.slice(0, 12).map(event => (
+                                        <div class="archive-slide-item">
+                                            <EventCard event={event} isPast={true} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <button class="slider-arrow next-arrow" aria-label="Next event">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                            <div class="slider-dots" id="sliderDots"></div>
+                        </div>
+                    ) : (
+                        <p class="text-center">{t('archive.empty') || "אין אירועים קודמים כרגע."}</p>
+                    )}
+
+                    <!-- Guestbook Promo Card -->
+                    <div class="guestbook-promo-card">
+                        <div class="guestbook-promo-content">
+                            <span class="guestbook-promo-icon">✍️</span>
+                            <p class="guestbook-promo-text">{t('home.guestbook.prompt')}</p>
+                        </div>
+                        <a href={`${basePath}/guestbook`} class="button button-secondary guestbook-promo-btn">
+                            {t('home.guestbook.cta')}
+                        </a>
+                    </div>
+                </div>
+            )}
+        </div>
+    </section>
+
+    {sortedEvents.length === 0 && sortedPastEvents.length > 0 && (
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const track = document.getElementById("archiveTrack");
+                if (!track) return;
+                
+                const items = track.querySelectorAll(".archive-slide-item");
+                const dotsContainer = document.getElementById("sliderDots");
+                const prevBtn = document.querySelector(".prev-arrow");
+                const nextBtn = document.querySelector(".next-arrow");
+                
+                let currentIndex = 0;
+                let itemsPerView = getItemsPerView();
+                let maxIndex = Math.max(0, items.length - itemsPerView);
+                
+                function getItemsPerView() {
+                    if (window.innerWidth >= 1024) return 3;
+                    if (window.innerWidth >= 768) return 2;
+                    return 1;
+                }
+                
+                function updateDots() {
+                    if (!dotsContainer) return;
+                    dotsContainer.innerHTML = "";
+                    
+                    const totalDots = items.length - itemsPerView + 1;
+                    if (totalDots <= 1) return;
+                    
+                    for (let i = 0; i < totalDots; i++) {
+                        const dot = document.createElement("button");
+                        dot.className = `slider-dot ${i === currentIndex ? "active" : ""}`;
+                        dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
+                        dot.addEventListener("click", () => {
+                            goToSlide(i);
+                            resetInterval();
+                        });
+                        dotsContainer.appendChild(dot);
+                    }
+                }
+                
+                function goToSlide(index) {
+                    currentIndex = Math.max(0, Math.min(index, maxIndex));
+                    
+                    // Determine RTL
+                    const isRtl = document.documentElement.dir === "rtl" || 
+                                  document.body.dir === "rtl" || 
+                                  track.closest("[dir='rtl']") !== null;
+                    
+                    const item = items[0];
+                    if (item) {
+                        const itemWidth = item.getBoundingClientRect().width;
+                        const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
+                        const slideAmount = currentIndex * (itemWidth + gap);
+                        
+                        if (isRtl) {
+                            track.style.transform = `translateX(${slideAmount}px)`;
+                        } else {
+                            track.style.transform = `translateX(-${slideAmount}px)`;
+                        }
+                    }
+                    
+                    // Update active class on dots
+                    const dots = dotsContainer?.querySelectorAll(".slider-dot");
+                    dots?.forEach((dot, idx) => {
+                        if (idx === currentIndex) {
+                            dot.classList.add("active");
+                        } else {
+                            dot.classList.remove("active");
+                        }
+                    });
+                }
+                
+                function handleResize() {
+                    const newItemsPerView = getItemsPerView();
+                    if (newItemsPerView !== itemsPerView) {
+                        itemsPerView = newItemsPerView;
+                        maxIndex = Math.max(0, items.length - itemsPerView);
+                        currentIndex = Math.min(currentIndex, maxIndex);
+                        updateDots();
+                        goToSlide(currentIndex);
+                    } else {
+                        goToSlide(currentIndex);
+                    }
+                }
+                
+                window.addEventListener("resize", handleResize);
+                
+                // Auto rotation
+                let intervalId;
+                function startInterval() {
+                    intervalId = setInterval(() => {
+                        if (currentIndex >= maxIndex) {
+                            goToSlide(0);
+                        } else {
+                            goToSlide(currentIndex + 1);
+                        }
+                    }, 5000);
+                }
+                
+                function resetInterval() {
+                    if (intervalId) {
+                        clearInterval(intervalId);
+                        startInterval();
+                    }
+                }
+                
+                prevBtn?.addEventListener("click", () => {
+                    if (currentIndex > 0) {
+                        goToSlide(currentIndex - 1);
+                    } else {
+                        goToSlide(maxIndex);
+                    }
+                    resetInterval();
+                });
+                
+                nextBtn?.addEventListener("click", () => {
+                    if (currentIndex < maxIndex) {
+                        goToSlide(currentIndex + 1);
+                    } else {
+                        goToSlide(0);
+                    }
+                    resetInterval();
+                });
+                
+                // Initialize
+                updateDots();
+                goToSlide(0);
+                startInterval();
+            });
+        </script>
+    )}
+
+    {/* Shabbat section is hidden for the end of the season */}
+    {/*
     <section id="shabbat-passover" class="shabbat-section">
         <div class="container shabbat-container">
             <div class="shabbat-image-wrapper">
@@ -138,6 +328,7 @@ const latestPosts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.
             </div>
         </div>
     </section>
+    */}
 
 
 
@@ -527,5 +718,265 @@ const latestPosts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.
     .shabbat-actions .button:not(.button-primary):hover {
         background-color: var(--color-white);
         text-decoration: none;
+    }
+
+    /* Archive Showcase & Carousel Styles */
+    .archive-showcase {
+        margin-block-start: 1rem;
+        padding-block: 2rem;
+    }
+    .archive-header {
+        text-align: center;
+        margin-block-end: 3rem;
+    }
+    .archive-header h2 {
+        font-size: 2.5rem;
+        color: var(--color-brand-blue);
+        margin-block-end: 0.75rem;
+        font-weight: 800;
+        position: relative;
+        display: inline-block;
+    }
+    .archive-header h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: var(--color-brand-green);
+        border-radius: 2px;
+    }
+    .archive-subtitle {
+        font-size: 1.2rem;
+        color: var(--color-warm-wood);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .archive-slider-container {
+        position: relative;
+        padding-inline: 4rem;
+        margin: 0 auto;
+        max-width: 1200px;
+    }
+    .archive-slider-clip {
+        overflow: hidden;
+        width: 100%;
+        padding-block: 1rem;
+    }
+    .archive-slider-track {
+        display: flex;
+        gap: 2rem;
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        width: 100%;
+    }
+    .archive-slide-item {
+        flex: 0 0 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    @media (min-width: 768px) {
+        .archive-slide-item {
+            flex: 0 0 calc(50% - 1rem);
+            width: calc(50% - 1rem);
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .archive-slide-item {
+            flex: 0 0 calc(33.333% - 1.33rem);
+            width: calc(33.333% - 1.33rem);
+        }
+    }
+
+    .slider-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        width: 3.2rem;
+        height: 3.2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--color-brand-blue);
+        z-index: 10;
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .slider-arrow:hover {
+        background: var(--color-brand-blue);
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 140, 255, 0.25);
+    }
+    .slider-arrow:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+    .prev-arrow {
+        left: 0;
+    }
+    .next-arrow {
+        right: 0;
+    }
+    
+    /* RTL adjustments for arrows */
+    :global([dir="rtl"]) .prev-arrow {
+        left: auto;
+        right: 0;
+        transform: translateY(-50%) rotate(180deg);
+    }
+    :global([dir="rtl"]) .prev-arrow:hover {
+        transform: translateY(-50%) scale(1.1) rotate(180deg);
+    }
+    :global([dir="rtl"]) .next-arrow {
+        right: auto;
+        left: 0;
+        transform: translateY(-50%) rotate(180deg);
+    }
+    :global([dir="rtl"]) .next-arrow:hover {
+        transform: translateY(-50%) scale(1.1) rotate(180deg);
+    }
+
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-block-start: 2rem;
+    }
+    
+    :global(.slider-dot) {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--color-sand) !important;
+        border: none !important;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+    :global(.slider-dot.active) {
+        background: var(--color-brand-blue) !important;
+        transform: scale(1.2);
+        width: 24px !important;
+        border-radius: 5px !important;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+
+    /* Instagram Follow Button */
+    .instagram-follow-container {
+        margin-block: 2rem 1.5rem;
+    }
+    .button-instagram {
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        color: var(--color-white) !important;
+        border: none;
+        border-radius: 50px;
+        padding: 0.8rem 1.8rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.35);
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        text-decoration: none !important;
+    }
+    .button-instagram:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 6px 20px rgba(220, 39, 67, 0.45);
+        color: var(--color-white) !important;
+    }
+    .button-instagram:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+    .instagram-icon {
+        stroke: currentColor;
+    }
+
+    /* Guestbook Promo Card inside Archive Showcase */
+    .guestbook-promo-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px rgba(0, 140, 255, 0.08);
+        border-radius: 20px;
+        padding: 1.5rem 2.5rem;
+        margin-block-start: 3.5rem;
+        margin-inline: auto;
+        max-width: 800px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .guestbook-promo-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 140, 255, 0.15);
+        border-color: rgba(0, 140, 255, 0.2);
+    }
+    .guestbook-promo-content {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        text-align: start;
+    }
+    .guestbook-promo-icon {
+        font-size: 2.2rem;
+        line-height: 1;
+        animation: float-promo 3s ease-in-out infinite;
+    }
+    .guestbook-promo-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--color-brand-blue);
+        margin: 0;
+        line-height: 1.5;
+    }
+    .guestbook-promo-btn {
+        background-color: var(--color-brand-green);
+        color: var(--color-white) !important;
+        border-radius: 50px;
+        padding: 0.8rem 1.8rem;
+        font-weight: 700;
+        font-size: 1rem;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0, 200, 115, 0.25);
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+    }
+    .guestbook-promo-btn:hover {
+        background-color: var(--color-brand-blue);
+        box-shadow: 0 6px 18px rgba(0, 140, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    @keyframes float-promo {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    @media (max-width: 767px) {
+        .guestbook-promo-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+            gap: 1.2rem;
+        }
+        .guestbook-promo-content {
+            flex-direction: column;
+            gap: 0.6rem;
+            text-align: center;
+        }
     }
 </style>
