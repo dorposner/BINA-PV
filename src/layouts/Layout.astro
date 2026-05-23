@@ -120,8 +120,15 @@ const basePath = lang === 'he' ? '' : '/' + lang;
                     &copy; {new Date().getFullYear()} {t('footer.rights')}
                     <a href="https://shithead.kesher.me/" target="_blank" rel="noopener noreferrer" class="easter-egg-link" title="Play Shithead Online">🃏</a>
                 </p>
-            </div>
         </footer>
+
+        <div class="site-promo-bar">
+            <div class="container">
+                <a href="https://sites.kesher.me" target="_blank" rel="noopener noreferrer">
+                    {t('footer.promo')}
+                </a>
+            </div>
+        </div>
 
         <script>
             // Hamburger menu toggle logic
@@ -305,5 +312,25 @@ const basePath = lang === 'he' ? '' : '/' + lang;
     }
     .footer-contact-info p {
         margin: 0;
+    }
+
+    /* Subtle absolute bottom promo bar */
+    .site-promo-bar {
+        background-color: #004780;
+        padding-block: 0.75rem;
+        text-align: center;
+        font-size: 0.82rem;
+    }
+    .site-promo-bar a {
+        color: rgba(255, 255, 255, 0.75) !important;
+        text-decoration: none !important;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+    .site-promo-bar a:hover {
+        color: var(--color-white) !important;
+        text-decoration: underline !important;
+        opacity: 1;
     }
 </style>

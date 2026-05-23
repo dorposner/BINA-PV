@@ -45,7 +45,7 @@ const latestPosts = rawPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.
         <div class="container hero-content">
             <h1>{t('hero.title')}</h1>
             <p>{t('hero.subtitle')}</p>
-            <a href="#schedule" class="button button-primary cta-button">{t('hero.cta')}</a>
+            <a href={`${basePath}/blog`} class="button button-primary cta-button">{t('hero.cta')}</a>
         </div>
         <div class="hero-overlay"></div>
     </section>
