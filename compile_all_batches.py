@@ -384,5 +384,18 @@ for entry in batch_4:
 with open("guestbook_new_batch.tsv", "w", encoding="utf-8-sig") as f:
     f.write(new_tsv_content)
 
+# Write only the remaining Batch 5 entries TSV file (Pages 39-53)
+remaining_tsv_content = "Timestamp\tName\tMessage\tImageUrl\n"
+for entry in batch_5:
+    msg = entry["Message"].replace('"', '""')
+    name = entry["Name"].replace('"', '""')
+    img = entry["ImageUrl"]
+    ts = entry["Timestamp"]
+    remaining_tsv_content += f'{ts}\t"{name}"\t"{msg}"\t"{img}"\n'
+
+with open("guestbook_remaining_batch.tsv", "w", encoding="utf-8-sig") as f:
+    f.write(remaining_tsv_content)
+
 print(f"Compiled {len(all_entries)} entries successfully to guestbook_complete_paste.tsv!")
 print(f"Compiled {len(batch_4)} new entries successfully to guestbook_new_batch.tsv!")
+print(f"Compiled {len(batch_5)} remaining entries successfully to guestbook_remaining_batch.tsv!")
